@@ -1,0 +1,160 @@
+:root {
+  --bg: #f4ecdf;
+  --surface: #fffaf3;
+  --text: #2d2218;
+  --muted: #766556;
+  --brand: #b68346;
+  --brand-deep: #8b5b21;
+  --olive: #7e8360;
+  --border: rgba(78, 56, 35, 0.12);
+  --shadow: 0 22px 48px rgba(60, 40, 20, 0.1);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #f8f3eb 0%, var(--bg) 100%);
+}
+
+h1, h2, h3, .logo-mark { font-family: "Cormorant Garamond", serif; }
+.admin-layout { min-height: 100vh; display: grid; grid-template-columns: 270px 1fr; }
+.admin-sidebar {
+  padding: 2rem 1.25rem;
+  background: #281e16;
+  color: rgba(255, 247, 236, 0.86);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.logo-mark { font-size: 2rem; color: #fff3de; text-decoration: none; font-weight: 700; }
+.admin-sidebar nav { display: grid; gap: 0.75rem; margin-top: 2rem; }
+.admin-sidebar nav a {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  color: rgba(255, 247, 236, 0.82);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.admin-sidebar nav a.active,
+.admin-sidebar nav a:hover { background: rgba(182, 131, 70, 0.18); color: #fff; }
+.admin-main { display: grid; grid-template-rows: auto 1fr auto; }
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 250, 243, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.hello-box { font-size: 1.25rem; font-weight: 800; }
+.topbar-actions { display: flex; gap: 1rem; align-items: center; }
+.logo-mark.small { font-size: 1.6rem; color: var(--text); }
+.admin-content { padding: 2rem; }
+.page-head { margin-bottom: 1.5rem; }
+.page-head h1 { font-size: clamp(2.5rem, 4vw, 4rem); margin-top: 0.6rem; }
+.eyebrow {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(182, 131, 70, 0.12);
+  color: var(--brand-deep);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.filter-card, .table-card, .message-box {
+  border: 1px solid var(--border);
+  background: rgba(255, 250, 243, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.filter-card, .table-card { padding: 1.4rem; border-radius: 1.4rem; }
+.table-card { margin-top: 1.2rem; }
+.form-control, .form-select {
+  min-height: 48px;
+  border-radius: 1rem;
+  border-color: rgba(78, 56, 35, 0.16);
+}
+
+.btn-outline-brand, .action-btn {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.btn-outline-brand {
+  border: 1px solid rgba(139, 91, 33, 0.18);
+  color: var(--brand-deep);
+  background: transparent;
+  padding: 0.8rem 1rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.status-pending { background: rgba(182, 131, 70, 0.14); color: var(--brand-deep); }
+.status-hold { background: rgba(126, 131, 96, 0.14); color: var(--olive); }
+.status-approved { background: rgba(47, 123, 91, 0.12); color: #2f7b5b; }
+.status-cancelled { background: rgba(167, 78, 61, 0.12); color: #a74e3d; }
+.action-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.action-btn {
+  border: 1px solid rgba(78, 56, 35, 0.12);
+  background: #fff;
+  color: var(--text);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.message-box {
+  margin-bottom: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.admin-footer {
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.back-to-top {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brand-deep);
+  color: #fff;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+}
+
+.back-to-top.show { opacity: 1; visibility: visible; }
+
+@media (max-width: 991.98px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { position: static; height: auto; }
+}
+
+@media (max-width: 767.98px) {
+  .admin-topbar { flex-direction: column; align-items: flex-start; }
+}
