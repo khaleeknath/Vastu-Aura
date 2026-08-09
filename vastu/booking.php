@@ -26,10 +26,92 @@ $phone = $_SESSION['phone'] ?? '';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/booking.css">
   <link rel="stylesheet" href="assets/css/common-modal.css">
   <?php include 'common-modal.php'; ?>
-  
+
+  <style>
+    /* --- Location / map block --- */
+    .location-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+      margin-top: 1.5rem;
+    }
+    .location-card h2 { margin-bottom: .75rem; }
+    .location-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1rem;
+      position: relative; /* anchor for the floating suggestions box */
+    }
+    .location-controls input[type="text"] {
+      flex: 1 1 220px;
+    }
+    #locationSuggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-width: 100%;
+      max-height: 260px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #e2ddd3;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      z-index: 1000;
+      margin-top: 4px !important;
+    }
+    #locationSuggestions .list-group-item {
+      cursor: pointer;
+      border: none;
+      border-bottom: 1px solid #f0ece4;
+      text-align: left;
+    }
+    #locationSuggestions .list-group-item:hover {
+      background: #f5f1ea;
+    }
+    #locationSuggestions .list-group-item:last-child {
+      border-bottom: none;
+    }
+    #vastuMap {
+      width: 100%;
+      height: 340px;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      z-index: 0;
+    }
+    .price-summary {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .price-summary .pill {
+      background: #f5f1ea;
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      flex: 1 1 160px;
+      text-align: center;
+    }
+    .price-summary .pill .label {
+      display: block;
+      font-size: .8rem;
+      color: #7a7368;
+      margin-bottom: .25rem;
+    }
+    .price-summary .pill .value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2c2620;
+    }
+    .shop-marker { font-size: 24px; text-align: center; line-height: 30px; }
+    .location-hint { font-size: .85rem; color: #7a7368; margin-bottom: .75rem; }
+  </style>
+
 </head>
 <body>
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
@@ -112,6 +194,12 @@ $phone = $_SESSION['phone'] ?? '';
                   <input id="bookingTime" name="preferred_time" type="time" class="form-control" required>
                 </div>
                 <div class="col-12">
+                  <label class="form-label">Flat / House No., Wing, Floor</label>
+                  <input type="text" class="form-control" name="unit_number" id="unitNumber"
+                         placeholder="e.g. Flat 402, B Wing, 4th Floor">
+                  <small class="text-muted">This won't affect the map pin — it's saved as extra detail alongside your building's location below.</small>
+                </div>
+                <div class="col-12">
                   <label class="form-label">Address</label>
                   <textarea id="bookingAddress" name="address" class="form-control" rows="4" placeholder="Enter property address" required></textarea>
                 </div>
@@ -128,7 +216,74 @@ $phone = $_SESSION['phone'] ?? '';
                     <option>Virtual Assessment</option>
                   </select>
                 </div>
-                <button class="btn btn-brand" type="button" id="openConfirmModal">Submit Booking</button>
+
+                <!-- ===== Property Type / BHK / Sq.ft (drives pricing) ===== -->
+                <div class="col-md-6">
+                  <label class="form-label">Property Type</label>
+                  <select class="form-select" name="property_type" id="propertyType">
+                    <option value="Flat">Flat / Residential Apartment</option>
+                    <option value="Commercial">Commercial / Office / Shop</option>
+                  </select>
+                </div>
+                <div class="col-md-6" id="bhkField">
+                  <label class="form-label">BHK Type</label>
+                  <select class="form-select" name="bhk_type" id="bhkType" required>
+                    <option value="1bhk">1 BHK</option>
+                    <option value="2bhk">2 BHK</option>
+                    <option value="3bhk">3 BHK</option>
+                  </select>
+                </div>
+                <div class="col-md-6 d-none" id="sqftField">
+                  <label class="form-label">Built-up Area (sq.ft)</label>
+                  <input type="number" class="form-control" name="sqft" id="sqftInput" min="1" placeholder="e.g. 1200">
+                </div>
+                <!-- ===== End Property Type / BHK / Sq.ft ===== -->
+
+                <!-- ===== Location + Distance-based Pricing ===== -->
+                <div class="col-12">
+                  <div class="location-card">
+                    <h2>Set Your Property Location</h2>
+                    <p class="location-hint">
+                      Search for your <strong>building, society, or street name</strong> (not your flat
+                      number — a flat number alone can't be found on a map, since every unit in a
+                      building sits at the same location). Enter the exact flat/house number separately
+                      above. We calculate your charge from the road distance between our shop
+                      (Appa Balwant Chowk, Pune) and this building.
+                    </p>
+
+                    <div class="location-controls">
+                      <button type="button" id="useMyLocationBtn" class="btn btn-outline-secondary">
+                        📍 Use My Current Location
+                      </button>
+                      <input type="text" id="locationSearchInput" class="form-control" placeholder="Search an address...">
+                      <button type="button" id="locationSearchBtn" class="btn btn-brand">Search</button>
+                    </div>
+
+                    <div id="vastuMap"></div>
+
+                    <div class="price-summary">
+                      <div class="pill">
+                        <span class="label">Distance from Shop</span>
+                        <span class="value" id="distanceValue">--</span>
+                      </div>
+                      <div class="pill">
+                        <span class="label">Estimated Charge</span>
+                        <span class="value" id="amountValue">--</span>
+                      </div>
+                    </div>
+
+                    <!-- Hidden fields submitted along with the booking -->
+                    <input type="hidden" name="client_lat" id="clientLat">
+                    <input type="hidden" name="client_lng" id="clientLng">
+                    <input type="hidden" name="distance_km" id="distanceKm">
+                    <input type="hidden" name="estimated_amount" id="estimatedAmount">
+                  </div>
+                </div>
+                <!-- ===== End Location block ===== -->
+
+                <div class="col-12 mt-4">
+                  <button class="btn btn-brand" type="button" id="openConfirmModal">Submit Booking</button>
+                </div>
               </form>
               <div id="bookingAlert" class="alert alert-success mt-4 d-none"></div>
             </div>
@@ -205,8 +360,28 @@ $phone = $_SESSION['phone'] ?? '';
                     </tr>
 
                     <tr>
+                        <th>Property Details</th>
+                        <td id="confirmPropertyDetails"></td>
+                    </tr>
+
+                    <tr>
+                        <th>Flat / House No.</th>
+                        <td id="confirmUnit"></td>
+                    </tr>
+
+                    <tr>
                         <th>Address</th>
                         <td id="confirmAddress"></td>
+                    </tr>
+
+                    <tr>
+                        <th>Distance from Shop</th>
+                        <td id="confirmDistance"></td>
+                    </tr>
+
+                    <tr>
+                        <th>Estimated Charge</th>
+                        <td id="confirmAmount"></td>
                     </tr>
 
                 </table>
@@ -301,8 +476,8 @@ $phone = $_SESSION['phone'] ?? '';
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/js/booking.js"></script>
-  <script src="assets/js/common-modal.js"></script>
 
 </body>
 </html>
