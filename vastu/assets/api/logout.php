@@ -8,7 +8,7 @@ session_destroy();
 // optional safety cookie clear
 setcookie("PHPSESSID", "", time() - 3600, "/");
 
-header("Location: /vastu/vastu/index.php");
+header("Location: /Vastu-Aura/vastu/index.php");
 
 exit;
 ?>

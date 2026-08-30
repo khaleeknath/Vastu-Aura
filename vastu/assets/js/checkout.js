@@ -77,88 +77,83 @@ document.getElementById("cancelOrder")
 
 // Confirm Order
 
-document.getElementById("confirmOrder")
-.addEventListener("click",()=>{
+document.getElementById("confirmOrder").addEventListener("click", async () => {
+    document.getElementById("confirmModal").style.display = "none";
 
+    const paymentMethod = document.querySelector("select").value;
 
-    // Hide confirmation
+    // Cash on Delivery skips Razorpay entirely — unchanged behavior
+    if (paymentMethod === "Cash on Delivery") {
+        placeOrder({ payment_method: paymentMethod });
+        return;
+    }
 
-    document.getElementById("confirmModal")
-    .style.display="none";
+    // Card / UPI — take payment first via Razorpay
+    try {
+        const orderRes = await fetch("assets/api/create-cart-order.php");
+        const orderData = await orderRes.json();
 
+        if (!orderData.status) {
+            alert(orderData.message || "Could not start payment.");
+            return;
+        }
 
-
-    const payment =
-    document.querySelector("select").value;
-
-
-
-    fetch("assets/api/order.php",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            payment_method:payment
-
-        })
-
-    })
-
-
-    .then(res=>res.json())
-
-
-    .then(res=>{
-
-
-        if(res.success){
-
-
-            // Show success modal
-
-            document.getElementById("successModal")
-            .style.display="flex";
-
-
-            // Store order id for invoice button
-
-            document.getElementById("invoice")
-            .onclick=function(){
-
-                window.location =
-                "invoice.php?order_id="+res.order_id;
-
+        const options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: orderData.currency,
+            order_id: orderData.order_id,
+            name: "VastuAura",
+            description: "Store Order",
+            prefill: {
+                name: document.getElementById("checkoutFirstName").value + " " +
+                      document.getElementById("checkoutLastName").value,
+                email: document.getElementById("checkoutEmail").value,
+                contact: document.getElementById("checkoutPhone").value
+            },
+            theme: { color: "#8a6d3b" },
+            handler: function (response) {
+                // Payment succeeded — now confirm + create the order server-side
+                placeOrder({
+                    payment_method: paymentMethod,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                });
             }
+        };
 
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function (resp) {
+            alert("Payment failed: " + resp.error.description);
+        });
+        rzp.open();
 
-
-        }
-        else{
-
-
-            alert(res.message);
-
-
-        }
-
-
-    })
-
-    .catch(error=>{
-
-
-        console.log(error);
-
-        alert("Something went wrong");
-
-
-    });
-
-
-
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong starting the payment.");
+    }
 });
+
+function placeOrder(payload) {
+    fetch("assets/api/Order.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            document.getElementById("successModal").style.display = "flex";
+            document.getElementById("invoice").onclick = function () {
+                window.location = "invoice.php?order_id=" + res.order_id;
+            };
+        } else {
+            alert(res.message);
+        }
+    })
+    .catch(error => {
+        console.log(error);
+        alert("Something went wrong");
+    });
+}

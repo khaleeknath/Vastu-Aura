@@ -1,13 +1,16 @@
 <?php
 session_start();
-include('../config/db-conn.php');
-include('razorpay-config.php');
+require_once('../config/db-conn.php');
+require_once('razorpay-config.php');
 
 header('Content-Type: application/json');
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["status" => false, "message" => "Please login first"]);
     exit;
 }
+
+$user_id = $_SESSION['user_id'];
 
 $amount = isset($_POST['amount']) ? (float) $_POST['amount'] : 0;
 
@@ -77,11 +80,16 @@ if ($insertStmt === false) {
 }
 
 $amountRupees = $amountInPaise / 100;
-$insertStmt->bind_param("sids", $order['id'], $user_id, $amountRupees, $order['currency']);
-$insertStmt->execute();
+$insertOk = $insertStmt->bind_param("sids", $order['id'], $user_id, $amountRupees, $order['currency'])
+    && $insertStmt->execute();
 
-if ($insertStmt->error) {
+if (!$insertOk || $insertStmt->affected_rows === 0) {
     error_log("[create-order] insert failed: " . $insertStmt->error);
+    echo json_encode([
+        "status" => false,
+        "message" => "Could not record order: " . $insertStmt->error
+    ]);
+    exit;
 }
 
 error_log("[create-order] success, order_id: " . $order['id']);
