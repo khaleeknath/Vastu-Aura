@@ -1,13 +1,3 @@
-// document.getElementById("bookLogout").addEventListener("click", function(e) {
-//   e.preventDefault();
-
-//   let confirmLogout = confirm("Are you sure you want to logout?");
-
-//   if (confirmLogout) {
-//       window.location.href = "assets/api/logout.php";
-//   }
-// });
-
 const form = document.getElementById("bookingForm");
 const openModalBtn = document.getElementById("openConfirmModal");
 
@@ -66,41 +56,119 @@ openModalBtn.addEventListener("click", function () {
 });
 
 
+/* =========================================================================
+   Razorpay payment + booking submission
+   -------------------------------------------------------------------------
+   Flow: Confirm Booking clicked
+     -> ask our server to create a Razorpay order for the estimated amount
+     -> open Razorpay Checkout
+     -> on success, send the booking form + Razorpay's payment_id/order_id/
+        signature to booking.php, which verifies the signature server-side
+        before saving anything.
+   ========================================================================= */
+
 document.getElementById("confirmSubmit").addEventListener("click", function () {
 
   const form = document.getElementById("bookingForm");
   const formData = new FormData(form);
+  const amount = document.getElementById("estimatedAmount").value;
+  const confirmBtn = document.getElementById("confirmSubmit");
+    console.log("Amount >>>>>>>>>>>>", amount)
+  if (!amount || parseFloat(amount) <= 0) {
+    alert("Please set your property location above so we can calculate the charge.");
+    return;
+  }
 
-  fetch("assets/api/booking.php", {
-      method: "POST",
-      body: formData
+  function resetConfirmBtn() {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "Confirm Booking";
+  }
+
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = "Processing...";
+
+  // Step 1: create the Razorpay order server-side
+  fetch("assets/api/create-order.php", {
+    method: "POST",
+    body: new URLSearchParams({ amount: amount })
   })
-  .then(response => response.json())
-  .then(data => {
-
-      if (data.status) {
-
-          // Close confirmation modal
-          bootstrap.Modal.getInstance(document.getElementById("confirmBookingModal")).hide();
-
-          // Show success modal
-          const successModal = new bootstrap.Modal(document.getElementById("successModal"));
-          successModal.show();
-
-          // Reset form
-          form.reset();
-
-      } else {
-          alert(data.message);
+    .then((res) => res.json())
+    .then((orderRes) => {
+      if (!orderRes.status) {
+        alert(orderRes.message || "Could not start payment.");
+        resetConfirmBtn();
+        return;
       }
 
-  })
-  .catch(error => {
-      console.error(error);
-      alert("Something went wrong.");
-  });
+      // Step 2: open Razorpay Checkout
+      const options = {
+        key: orderRes.key_id,
+        amount: orderRes.amount,
+        currency: orderRes.currency,
+        name: "VastuAura",
+        description: "Consultation Booking",
+        order_id: orderRes.order_id,
+        prefill: {
+          name: document.querySelector('[name="name"]').value,
+          email: document.querySelector('[name="email"]').value,
+          contact: document.querySelector('[name="mobile"]').value
+        },
+        theme: { color: "#8a6d3b" },
+        modal: {
+          ondismiss: resetConfirmBtn
+        },
+        handler: function (rzpResponse) {
+          // Step 3: payment succeeded on Razorpay's side - now submit the
+          // booking + payment proof to our server for verification & save
+          formData.append("razorpay_order_id", rzpResponse.razorpay_order_id);
+          formData.append("razorpay_payment_id", rzpResponse.razorpay_payment_id);
+          formData.append("razorpay_signature", rzpResponse.razorpay_signature);
 
+          fetch("assets/api/booking.php", {
+            method: "POST",
+            body: formData
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status) {
+                bootstrap.Modal.getInstance(document.getElementById("confirmBookingModal")).hide();
+                const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+                successModal.show();
+                form.reset();
+              } else {
+                // Payment went through on Razorpay's side but saving failed -
+                // surface the payment_id so support can reconcile it manually.
+                alert(
+                  (data.message || "Booking could not be saved.") +
+                  "\nYour payment ID (please save this): " + rzpResponse.razorpay_payment_id
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              alert(
+                "Something went wrong saving your booking after payment.\n" +
+                "Your payment ID (please save this): " + rzpResponse.razorpay_payment_id
+              );
+            })
+            .finally(resetConfirmBtn);
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on("payment.failed", function (resp) {
+        alert("Payment failed: " + resp.error.description);
+        resetConfirmBtn();
+      });
+      rzp.open();
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("Could not start payment. Please try again.");
+      resetConfirmBtn();
+    });
 });
+
 
 /* =========================================================================
    VastuAura - Location + Distance-based Pricing
@@ -122,9 +190,10 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
   // ---------------------------------------------------------------------
   // 1. CONFIG — edit these two blocks to match your business rules
   // ---------------------------------------------------------------------
+  
   const SHOP_LOCATION = {
-    lat: 18.51555,
-    lng: 73.85675,
+    lat: 18.516583,
+    lng: 73.853917,
     label: "VastuAura Shop, Appa Balwant Chowk, Pune"
   };
 
@@ -378,9 +447,6 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
       });
 
       if (!res.ok) {
-        // Log the real status so this is diagnosable instead of a silent
-        // generic "search failed" — e.g. 403/429 usually means rate-limited
-        // or blocked by a firewall/ad-blocker/proxy between you and Nominatim.
         const bodyText = await res.text().catch(() => "");
         console.error(
           `Nominatim search failed: HTTP ${res.status} ${res.statusText}`,
@@ -398,10 +464,6 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
         box = document.createElement("div");
         box.id = "locationSuggestions";
         box.className = "list-group";
-        // Must be appended INSIDE .location-controls (which has
-        // position: relative) so its position: absolute anchors correctly
-        // right under the search box. Using insertAdjacentElement("afterend")
-        // here would place it as a sibling instead, breaking the anchor.
         searchInput.parentElement.appendChild(box);
       }
       box.innerHTML = "";
@@ -430,11 +492,7 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
     }
 
     async function performSearch(query) {
-      // Try the query as typed first
       let results = await geocode(query);
-
-      // If nothing came back and the user didn't already mention Pune,
-      // retry with "Pune" appended — helps short/local place names
       if (results.length === 0 && !/pune/i.test(query)) {
         results = await geocode(`${query}, Pune`);
       }
@@ -472,13 +530,11 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
     searchInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        // Enter runs an immediate search rather than waiting for debounce
         clearTimeout(debounceTimer);
         runSearch();
       }
     });
 
-    // ---- Live "type-ahead" suggestions, Google-Maps style ----
     let debounceTimer = null;
     searchInput.addEventListener("input", function () {
       const query = searchInput.value.trim();
@@ -490,8 +546,6 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
         return;
       }
 
-      // Wait until the user pauses typing (350ms) before hitting the API,
-      // so we don't fire a request on every keystroke
       debounceTimer = setTimeout(async function () {
         try {
           const results = await performSearch(query);
@@ -502,7 +556,6 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
       }, 350);
     });
 
-    // Close the suggestions dropdown when clicking elsewhere on the page
     document.addEventListener("click", function (e) {
       const box = document.getElementById("locationSuggestions");
       if (!box) return;
@@ -540,7 +593,7 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
     bhkSelect.addEventListener("change", recalcAndDisplayAmount);
     sqftInput.addEventListener("input", recalcAndDisplayAmount);
 
-    toggleFields(); // set correct initial state (Flat selected by default)
+    toggleFields();
   }
 
   // ---------------------------------------------------------------------
@@ -550,12 +603,9 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
     initMap();
     initControls();
     initPropertyFields();
-    // Initialize distance/price against the shop's own point (0 km) so
-    // fields are never blank before the user picks a location.
     updateDistanceAndPrice(SHOP_LOCATION.lat, SHOP_LOCATION.lng);
   });
 
-  // Expose for other scripts to read the latest computed values if needed
   window.VastuLocation = {
     getShopLocation: () => SHOP_LOCATION,
     getClientLocation: () => currentClientLatLng,

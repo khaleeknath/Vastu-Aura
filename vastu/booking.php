@@ -477,6 +477,7 @@ $phone = $_SESSION['phone'] ?? '';
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="assets/js/booking.js"></script>
 
 </body>
