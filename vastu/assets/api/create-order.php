@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 $amount = isset($_POST['amount']) ? (float) $_POST['amount'] : 0;
-
+$amount = $amount / 2;
 error_log("[create-order] amount received: " . $amount);
 
 if ($amount <= 0) {

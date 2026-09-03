@@ -2,14 +2,15 @@
 session_start();
 include('../config/db-conn.php');
 require_once('razorpay-config.php');
-
+require_once('mailer.php');
 header("Content-Type: application/json");
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["success" => false, "message" => "Please login first."]);
     exit;
 }
-
+$name = $_SESSION['user']['first_name'] ?? '';
+$lname = $_SESSION['user']['last_name'] ?? '';
 $user_id = $_SESSION['user_id'];
 $data = json_decode(file_get_contents("php://input"), true);
 $paymentMethod = $data['payment_method'] ?? '';
@@ -113,6 +114,22 @@ try {
     $stmt->execute();
 
     mysqli_commit($conn);
+
+    // Send order confirmation email AFTER order is successfully committed
+$emailData = [
+    'order_id'            => $order_id,
+    'name'                => $_SESSION['user']['first_name'] ,
+    'email'               => $_SESSION['email'],
+    'order_date'          => date('Y-m-d H:i:s'),
+    'payment_method'      => $paymentMethod,
+    'razorpay_payment_id' => $razorpay_payment_id,
+    'items'               => $items,
+    'total'               => $total,
+    'shipping'            => $shipping,
+    'grand_total'         => $grandTotal
+];
+
+sendOrderConfirmationEmail($emailData);
 
     echo json_encode(["success" => true, "order_id" => $order_id, "message" => "Order placed successfully."]);
 

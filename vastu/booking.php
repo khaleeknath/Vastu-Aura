@@ -191,7 +191,12 @@ $phone = $_SESSION['phone'] ?? '';
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Preferred Time</label>
-                  <input id="bookingTime" name="preferred_time" type="time" class="form-control" required>
+                  <select id="preferred_time" class="form-control" name="preferred_time">
+                  <option  disabled value="">-- Select Preferred Time --</option>
+                  </select>
+                  <small id="noSlotsMsg" class="text-danger d-none">
+                    No slots left for this date. Please select a different date.
+                  </small>
                 </div>
                 <div class="col-12">
                   <label class="form-label">Flat / House No., Wing, Floor</label>
@@ -201,7 +206,7 @@ $phone = $_SESSION['phone'] ?? '';
                 </div>
                 <div class="col-12">
                   <label class="form-label">Address</label>
-                  <textarea id="bookingAddress" name="address" class="form-control" rows="4" placeholder="Enter property address" required></textarea>
+                  <textarea id="bookingAddress" name="address" class="form-control" rows="4"  placeholder="Enter property address" required></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Preferred Date</label>
@@ -270,6 +275,7 @@ $phone = $_SESSION['phone'] ?? '';
                         <span class="label">Estimated Charge</span>
                         <span class="value" id="amountValue">--</span>
                       </div>
+                      <div class="payment-notice"> <strong>💳 Booking Payment Required</strong> <p> To successfully confirm your appointment, you need to pay <strong>50% of the total appointment charge</strong> as an advance payment. </p> </div>
                     </div>
 
                     <!-- Hidden fields submitted along with the booking -->
@@ -278,6 +284,8 @@ $phone = $_SESSION['phone'] ?? '';
                     <input type="hidden" name="distance_km" id="distanceKm">
                     <input type="hidden" name="estimated_amount" id="estimatedAmount">
                   </div>
+
+                  
                 </div>
                 <!-- ===== End Location block ===== -->
 
@@ -384,25 +392,37 @@ $phone = $_SESSION['phone'] ?? '';
                         <td id="confirmAmount"></td>
                     </tr>
 
-                </table>
+                    </table>
 
-            </div>
+<div class="form-check mt-3">
+  <input type="checkbox" class="form-check-input" id="agreeTerms">
+  <label class="form-check-label" for="agreeTerms">
+    I agree to the <a href="terms.php" target="_blank">Terms and Conditions</a>,
+    including that the payment is <strong>non-refundable</strong>.
+  </label>
+</div>
+<small id="agreeError" class="text-danger d-none">
+  Please accept the Terms and Conditions before confirming your booking.
+</small>
 
-            <div class="modal-footer">
+</div>
 
-                <button type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal">
-                    Edit
-                </button>
+<div class="modal-footer">
 
-                <button type="button"
-                    id="confirmSubmit"
-                    class="btn btn-success">
-                    Confirm Booking
-                </button>
+<button type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal">
+    Edit
+</button>
 
-            </div>
+<button type="button"
+    id="confirmSubmit"
+    class="btn btn-success"
+    disabled>
+    Confirm Booking
+</button>
+
+</div>
 
         </div>
     </div>

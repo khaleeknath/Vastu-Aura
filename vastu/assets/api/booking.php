@@ -13,6 +13,49 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 
+if (isset($_GET['action']) && $_GET['action'] === 'get_booking_slots') {
+    $master_id = 2;
+    $selectedDate = $_GET['date'] ?? null;
+
+    // 1. Get all possible time slots from the master meta table
+    $sql = "SELECT meta_key, meta_value FROM tbl_master_meta_data WHERE master_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $master_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $allSlots = [];
+    while ($row = $result->fetch_assoc()) {
+        $allSlots[] = [
+            'key'   => $row['meta_key'],
+            'value' => $row['meta_value']
+        ];
+    }
+
+    // 2. If a date was passed, find which slots are already booked (paid) for it
+    $bookedTimes = [];
+    if (!empty($selectedDate)) {
+        $bookedStmt = $conn->prepare(
+            "SELECT preferred_time FROM tbl_appointment WHERE preferred_date = ? AND payment_status = 'paid'"
+        );
+        $bookedStmt->bind_param("s", $selectedDate);
+        $bookedStmt->execute();
+        $bookedResult = $bookedStmt->get_result();
+        while ($row = $bookedResult->fetch_assoc()) {
+            $bookedTimes[] = $row['preferred_time'];
+        }
+    }
+
+    // 3. Remove already-booked slots from the list shown to the user
+    $availableSlots = array_values(array_filter($allSlots, function ($slot) use ($bookedTimes) {
+        return !in_array($slot['value'], $bookedTimes);
+    }));
+
+    echo json_encode(['status' => 'success', 'data' => $availableSlots]);
+    exit;
+}
+
+
 $user_id = $_SESSION['user_id'];
 error_log("[booking] ---- New request, user_id: $user_id ----");
 error_log("[booking] Raw POST: " . json_encode($_POST));
@@ -171,6 +214,7 @@ if ($executed && $stmt->affected_rows > 0) {
         'preferred_time' => $time,
         'consultation_type' => $type,
         'property_type' => $property_type,
+        'bhk_type' => $bhk_type,
         'address' => $address,
         'amount' => $amount,
         'razorpay_payment_id' => $razorpay_payment_id,

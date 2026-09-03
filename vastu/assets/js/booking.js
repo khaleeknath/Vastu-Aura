@@ -3,7 +3,17 @@ const openModalBtn = document.getElementById("openConfirmModal");
 
 openModalBtn.addEventListener("click", function () {
 
-    // Trigger HTML5 validation
+    const timeSelect = document.getElementById("preferred_time");
+    const noSlotsMsg = document.getElementById("noSlotsMsg");
+
+    // Explicit check: preferred_time must not be empty or disabled
+    if (!timeSelect.value || timeSelect.disabled) {
+        noSlotsMsg.classList.remove("d-none");
+        timeSelect.focus();
+        return;
+    }
+
+    // Trigger HTML5 validation for everything else
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -48,8 +58,13 @@ openModalBtn.addEventListener("click", function () {
     document.getElementById('confirmDistance').innerText =
         document.getElementById('distanceValue').textContent;
 
-    document.getElementById('confirmAmount').innerText =
-        document.getElementById('amountValue').textContent;
+        let amountCalculation = document.getElementById('amountValue').textContent.trim();
+
+        let amount = parseFloat(amountCalculation.replace(/[₹,]/g, ''));
+
+        let halfAmount = amount / 2;
+
+document.getElementById('confirmAmount').innerText =`₹${halfAmount.toLocaleString('en-IN')}`;
 
     const modal = new bootstrap.Modal(document.getElementById('confirmBookingModal'));
     modal.show();
@@ -69,16 +84,19 @@ openModalBtn.addEventListener("click", function () {
 
 document.getElementById("confirmSubmit").addEventListener("click", function () {
 
+  if (!agreeTermsCheckbox.checked) {
+    agreeErrorMsg.classList.remove("d-none");
+    return; // Razorpay never opens
+  }
+
   const form = document.getElementById("bookingForm");
   const formData = new FormData(form);
   const amount = document.getElementById("estimatedAmount").value;
   const confirmBtn = document.getElementById("confirmSubmit");
-    console.log("Amount >>>>>>>>>>>>", amount)
   if (!amount || parseFloat(amount) <= 0) {
     alert("Please set your property location above so we can calculate the charge.");
     return;
   }
-
   function resetConfirmBtn() {
     confirmBtn.disabled = false;
     confirmBtn.textContent = "Confirm Booking";
@@ -612,3 +630,79 @@ document.getElementById("confirmSubmit").addEventListener("click", function () {
     getPriceConfig: () => PRICE_CONFIG
   };
 })();
+
+
+// Terms & Conditions gate for the Confirm Booking button
+const agreeTermsCheckbox = document.getElementById("agreeTerms");
+const agreeErrorMsg = document.getElementById("agreeError");
+const confirmSubmitBtn = document.getElementById("confirmSubmit");
+
+agreeTermsCheckbox.addEventListener("change", function () {
+    confirmSubmitBtn.disabled = !this.checked;
+    if (this.checked) {
+        agreeErrorMsg.classList.add("d-none");
+    }
+});
+
+// Reset the checkbox + button state each time the modal reopens,
+// so a re-edited booking doesn't silently carry over a stale "agreed" state
+document.getElementById('confirmBookingModal').addEventListener('show.bs.modal', function () {
+    agreeTermsCheckbox.checked = false;
+    confirmSubmitBtn.disabled = true;
+    agreeErrorMsg.classList.add("d-none");
+});
+
+function loadSlotsForDate(selectedDate) {
+  const dropdown = document.getElementById('preferred_time');
+  const noSlotsMsg = document.getElementById('noSlotsMsg');
+
+  dropdown.innerHTML = '<option disabled selected value="">-- Select Preferred Time --</option>';
+  dropdown.disabled = false;
+  noSlotsMsg.classList.add('d-none');
+
+  fetch(`assets/api/booking.php?action=get_booking_slots&date=${encodeURIComponent(selectedDate)}`)
+      .then(response => response.json())
+      .then(result => {
+          if (result.status === 'success') {
+              if (result.data.length === 0) {
+                  dropdown.disabled = true;
+                  noSlotsMsg.classList.remove('d-none');
+                  return;
+              }
+              result.data.forEach((slot) => {
+                  const option = document.createElement('option');
+                  option.value = slot.value;
+                  option.textContent = slot.value;
+                  dropdown.appendChild(option);
+              });
+              dropdown.selectedIndex = 1; // auto-select first available slot
+          }
+      })
+      .catch(error => console.error('Error loading booking slots:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const dateInput = document.getElementById('bookingDate');
+
+  // Tomorrow's date (min + default)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  const tomorrowStr = `${yyyy}-${mm}-${dd}`;
+
+  dateInput.min = tomorrowStr;
+  dateInput.value = tomorrowStr;
+
+  // Load slots for the default date on page load
+  loadSlotsForDate(tomorrowStr);
+
+  // Reload slots every time the user picks a different date
+  dateInput.addEventListener('change', function () {
+      if (this.value) {
+          loadSlotsForDate(this.value);
+      }
+  });
+});

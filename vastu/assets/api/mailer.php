@@ -150,3 +150,201 @@ function buildCustomerEmailPlainText(array $b): string
         . "Amount Paid: Rs. " . number_format((float)$b['amount'], 2) . "\n"
         . "Payment ID: {$b['razorpay_payment_id']}\n";
 }
+
+
+/**
+ * Sends successful e-commerce order confirmation email to customer.
+ */
+function sendOrderConfirmationEmail(array $order): bool
+{
+    $mail = getConfiguredMailer();
+
+    if ($mail === null) {
+        return false;
+    }
+
+    try {
+        $mail->addAddress($order['email'], $order['name']);
+
+        $mail->Subject = "Your VastuAura Order #{$order['order_id']} is Confirmed";
+
+        // $mail->Body = buildOrderConfirmationEmailHtml($order);
+        $mail->AltBody = buildOrderConfirmationEmailPlainText($order);
+
+        $mail->send();
+
+        error_log(
+            "[mailer] Order confirmation email sent to " .
+            $order['email'] .
+            " for order #" .
+            $order['order_id']
+        );
+
+        return true;
+
+    } catch (PHPMailerException $e) {
+
+        error_log(
+            "[mailer] Failed to send order confirmation email: " .
+            $mail->ErrorInfo
+        );
+
+        return false;
+    }
+}
+
+
+// function buildOrderConfirmationEmailHtml(array $o): string
+// {
+//     $itemsHtml = '';
+
+//     foreach ($o['items'] as $item) {
+
+//         $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+
+//         $itemsHtml .= "
+//             <tr>
+//                 <td style='padding:8px 0;'>
+//                     " . e($item['product_name']) . "
+//                 </td>
+
+//                 <td style='padding:8px 0; text-align:center;'>
+//                     " . e((string)$item['quantity']) . "
+//                 </td>
+
+//                 <td style='padding:8px 0; text-align:right;'>
+//                     ₹" . number_format((float)$item['price'], 2) . "
+//                 </td>
+
+//                 <td style='padding:8px 0; text-align:right;'>
+//                     ₹" . number_format($itemTotal, 2) . "
+//                 </td>
+//             </tr>
+//         ";
+//     }
+
+//     return "
+//     <div style='font-family:Arial,sans-serif; max-width:600px; margin:0 auto; color:#2c2620;'>
+
+//         <h2 style='color:#8a6d3b;'>
+//             🎉 Your Order is Confirmed!
+//         </h2>
+
+//         <p>
+//             Hi <strong>" . e($o['name']) . "</strong>,
+//         </p>
+
+//         <p>
+//             Thank you for shopping with <strong>VastuAura</strong>.
+//             Your order has been successfully placed and your payment has been received.
+//         </p>
+
+//         <div style='background:#f8f5ef; padding:15px; margin:20px 0;'>
+//             <strong>Order ID:</strong> #" . e((string)$o['order_id']) . "<br>
+//             <strong>Order Date:</strong> " . e($o['order_date']) . "<br>
+//             <strong>Payment Method:</strong> " . e($o['payment_method']) . "
+//         </div>
+
+//         <h3>Order Details</h3>
+
+//         <table style='width:100%; border-collapse:collapse;'>
+//             <thead>
+//                 <tr style='border-bottom:1px solid #ddd;'>
+//                     <th style='text-align:left; padding:8px 0;'>Product</th>
+//                     <th style='text-align:center; padding:8px 0;'>Qty</th>
+//                     <th style='text-align:right; padding:8px 0;'>Price</th>
+//                     <th style='text-align:right; padding:8px 0;'>Total</th>
+//                 </tr>
+//             </thead>
+
+//             <tbody>
+//                 {$itemsHtml}
+//             </tbody>
+//         </table>
+
+//         <div style='margin-top:20px; border-top:1px solid #ddd; padding-top:15px;'>
+
+//             <p style='text-align:right;'>
+//                 <strong>Products Total:</strong>
+//                 ₹" . number_format((float)$o['total'], 2) . "
+//             </p>
+
+//             <p style='text-align:right;'>
+//                 <strong>Shipping:</strong>
+//                 ₹" . number_format((float)$o['shipping'], 2) . "
+//             </p>
+
+//             <p style='text-align:right; font-size:18px;'>
+//                 <strong>Grand Total:</strong>
+//                 ₹" . number_format((float)$o['grand_total'], 2) . "
+//             </p>
+
+//         </div>
+
+//         " . (
+//             !empty($o['razorpay_payment_id'])
+//             ? "
+//             <p style='margin-top:20px;'>
+//                 <strong>Payment ID:</strong>
+//                 " . e($o['razorpay_payment_id']) . "
+//             </p>
+//             "
+//             : ""
+//         ) . "
+
+//         <p style='margin-top:25px;'>
+//             We will process your order shortly and keep you updated about its status.
+//         </p>
+
+//         <p style='color:#7a7368; font-size:13px;'>
+//             Thank you for choosing VastuAura.
+//         </p>
+
+//     </div>";
+// }
+
+
+
+function buildOrderConfirmationEmailPlainText(array $o): string
+{
+    $text = "Your VastuAura order is confirmed.\n\n";
+
+    $text .= "Order ID: #" . $o['order_id'] . "\n";
+    $text .= "Order Date: " . $o['order_date'] . "\n";
+    $text .= "Payment Method: " . $o['payment_method'] . "\n";
+
+    if (!empty($o['razorpay_payment_id'])) {
+        $text .= "Payment ID: " . $o['razorpay_payment_id'] . "\n";
+    }
+
+    $text .= "\n-----------------------------\n";
+    $text .= "Order Items\n";
+    $text .= "-----------------------------\n";
+
+    foreach ($o['items'] as $item) {
+
+        $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+
+        $text .= "Product: " . $item['name'] . "\n";
+        $text .= "Quantity: " . $item['quantity'] . "\n";
+        $text .= "Price: Rs. " . number_format((float)$item['price'], 2) . "\n";
+        $text .= "Total: Rs. " . number_format($itemTotal, 2) . "\n";
+        $text .= "-----------------------------\n";
+    }
+
+    $text .= "\nProducts Total: Rs. "
+        . number_format((float)$o['total'], 2);
+
+    $text .= "\nShipping: Rs. "
+        . number_format((float)$o['shipping'], 2);
+
+    $text .= "\nGrand Total: Rs. "
+        . number_format((float)$o['grand_total'], 2);
+
+    $text .= "\n\nThank you for shopping with VastuAura.";
+
+    return $text;
+}
+
+
+
