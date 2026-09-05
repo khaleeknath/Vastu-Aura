@@ -125,7 +125,7 @@ if (!$result) {
                   <th>Time</th>
                   <th>Status</th>
                   <th>Action</th>
-                  <th>Comment</th>
+                  <!-- <th>Comment</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -141,30 +141,62 @@ while ($row = mysqli_fetch_assoc($result)) {
     <td><?= htmlspecialchars($row['preferred_time']) ?></td>
     <td><?= htmlspecialchars($row['status']) ?></td>
 
-    <!-- Action Dropdown -->
-    <td>
-        <select name="status" class="form-control status-dropdown"
-                data-id="<?= $row['id'] ?>">
-            <option value="pending" <?= $row['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-            <option value="approved" <?= $row['status'] == 'approved' ? 'selected' : '' ?>>Approved</option>
-            <option value="rejected" <?= $row['status'] == 'rejected' ? 'selected' : '' ?>>Rejected</option>
-            <option value="completed" <?= $row['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-            <option value="cancelled" <?= $row['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-        </select>
-    </td>
-
-    <!-- Comment Box -->
-    <td>
-        <textarea name="comment"
-                  class="form-control comment-box"
-                  data-id="<?= $row['id'] ?>"
-                  placeholder="Add comment..."><?= htmlspecialchars($row['comment'] ?? '') ?></textarea>
-    </td>
+<td>
+    <button type="button" class="btn btn-sm btn-outline-brand view-appointment"
+            data-id="<?= $row['id'] ?>"
+            data-name="<?= htmlspecialchars($row['name']) ?>"
+            data-mobile="<?= htmlspecialchars($row['mobile']) ?>"
+            data-date="<?= htmlspecialchars($row['preferred_date']) ?>"
+            data-time="<?= htmlspecialchars($row['preferred_time']) ?>"
+            data-status="<?= htmlspecialchars($row['status']) ?>"
+            data-comment="<?= htmlspecialchars($row['comment'] ?? '') ?>">
+        View
+    </button>
+</td>
     
 </tr>
 <?php } ?>
 </tbody>
             </table>
+
+            <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Appointment Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modalAppointmentId">
+        <p class="mb-2"><strong>Client:</strong> <span id="modalName"></span></p>
+        <p class="mb-2"><strong>Mobile:</strong> <span id="modalMobile"></span></p>
+        <p class="mb-3"><strong>Date:</strong> <span id="modalDate"></span> &nbsp; <strong>Time:</strong> <span id="modalTime"></span></p>
+
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <select id="modalStatus" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Comment</label>
+          <textarea id="modalComment" class="form-control" rows="3" placeholder="Add comment..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="modalUpdateBtn" class="btn btn-success">Update &amp; Notify</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
     <button id="saveAll" class="btn btn-success" type="submit">Save All</button>
     <button id="cancelAll" class="btn btn-secondary">Cancel</button>

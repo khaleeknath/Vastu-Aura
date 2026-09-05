@@ -53,7 +53,7 @@ if ($isOnlinePayment) {
 mysqli_begin_transaction($conn);
 
 try {
-    // Get Cart Items
+    // Get Cart Items (unchanged — used only for order processing/totals)
     $sql = "
     SELECT c.product_id, c.quantity, p.price
     FROM tbl_cart c
@@ -115,23 +115,40 @@ try {
 
     mysqli_commit($conn);
 
+    // ---- Separate query, just for the email: fetch the order's items WITH product names ----
+    // Pulling from tbl_order_items (the permanent record just inserted) rather than the cart,
+    // since the cart is now cleared and this table reflects exactly what was ordered.
+    $emailItems = [];
+    $itemStmt = $conn->prepare("
+        SELECT oi.product_id, oi.quantity, oi.price, p.name
+        FROM tbl_order_items oi
+        INNER JOIN tbl_products p ON p.id = oi.product_id
+        WHERE oi.order_id = ?
+    ");
+    $itemStmt->bind_param("i", $order_id);
+    $itemStmt->execute();
+    $itemResult = $itemStmt->get_result();
+    while ($row = $itemResult->fetch_assoc()) {
+        $emailItems[] = $row;
+    }
+
     // Send order confirmation email AFTER order is successfully committed
-$emailData = [
-    'order_id'            => $order_id,
-    'name'                => $_SESSION['user']['first_name'] ,
-    'email'               => $_SESSION['email'],
-    'order_date'          => date('Y-m-d H:i:s'),
-    'payment_method'      => $paymentMethod,
-    'razorpay_payment_id' => $razorpay_payment_id,
-    'items'               => $items,
-    'total'               => $total,
-    'shipping'            => $shipping,
-    'grand_total'         => $grandTotal
-];
+    $emailData = [
+        'order_id'            => $order_id,
+        'name'                => $_SESSION['user']['first_name'],
+        'email'               => $_SESSION['email'],
+        'order_date'          => date('Y-m-d H:i:s'),
+        'payment_method'      => $paymentMethod,
+        'razorpay_payment_id' => $razorpay_payment_id,
+        'items'               => $emailItems,
+        'total'               => $total,
+        'shipping'            => $shipping,
+        'grand_total'         => $grandTotal
+    ];
 
-sendOrderConfirmationEmail($emailData);
+    $emailSent = sendOrderConfirmationEmail($emailData);
 
-    echo json_encode(["success" => true, "order_id" => $order_id, "message" => "Order placed successfully."]);
+    echo json_encode(["success" => true, "order_id" => $order_id, "email_sent" => $emailSent, "message" => "Order placed successfully."]);
 
 } catch (Exception $e) {
     mysqli_rollback($conn);

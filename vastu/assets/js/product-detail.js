@@ -189,6 +189,21 @@ function loadProduct() {
             ).innerText =
                 product.name;
 
+                console.log(">>>>",product.image)
+                if (product.image) {
+
+                    document.getElementById(
+                        'productImage'
+                    ).src =
+                        'assets/uploads/products/' +
+                        product.image;
+                        
+                    document.getElementById(
+                        'productImage'
+                    ).alt =
+                        product.name;
+                }
+
             document.getElementById(
                 'productDescription'
             ).innerText =
@@ -204,19 +219,7 @@ function loadProduct() {
             ).innerText =
                 product.description;
 
-            if (product.image) {
-
-                document.getElementById(
-                    'productImage'
-                ).src =
-                    'uploads/products/' +
-                    product.image;
-
-                document.getElementById(
-                    'productImage'
-                ).alt =
-                    product.name;
-            }
+           
         })
 
         .catch(error => {

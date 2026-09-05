@@ -77,8 +77,6 @@ if (!isset($_SESSION['user_id'])) {
 
                             <img
                                 id="productImage"
-                                src=""
-                                alt=""
                                 class="img-fluid">
 
                         </div>

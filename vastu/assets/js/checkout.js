@@ -148,6 +148,10 @@ function placeOrder(payload) {
             document.getElementById("invoice").onclick = function () {
                 window.location = "invoice.php?order_id=" + res.order_id;
             };
+            if (!res.email_sent) {
+                // optional: show a small inline note, don't block success
+                console.warn("Order placed, but confirmation email failed to send.");
+            }
         } else {
             alert(res.message);
         }
