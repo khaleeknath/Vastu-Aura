@@ -3,6 +3,7 @@ session_start();
 include('../config/db-conn.php');
 require_once('razorpay-config.php');
 require_once('mailer.php');
+require_once('stock-ledger.php');
 header("Content-Type: application/json");
 
 if (!isset($_SESSION['user_id'])) {
@@ -108,6 +109,24 @@ try {
     $stmt->bind_param("isss", $order_id, $paymentMethod, $paymentStatus, $transactionId);
     $stmt->execute();
 
+
+    // Deduct stock ONLY when payment is actually confirmed successful.
+    // COD orders stay "Pending" here — their stock gets deducted later,
+    // when the payment is actually collected/confirmed (see mark-order-paid.php).
+    if ($paymentStatus === "Paid") {
+        foreach ($items as $item) {
+            recordStockMovement(
+                $conn,
+                (int)$item['product_id'],
+                'OUT',
+                (int)$item['quantity'],
+                "Order #{$order_id}",
+                $user_id
+            );
+        }
+    }
+
+
     // Clear Cart
     $stmt = $conn->prepare("DELETE FROM tbl_cart WHERE user_id=?");
     $stmt->bind_param("i", $user_id);
@@ -148,7 +167,9 @@ try {
 
     $emailSent = sendOrderConfirmationEmail($emailData);
 
-    echo json_encode(["success" => true, "order_id" => $order_id, "email_sent" => $emailSent, "message" => "Order placed successfully."]);
+    // Order placed — deduct stock
+    recordStockMovement($conn, 101, 'OUT', 2, $order_id, $_SESSION['admin_id']);
+    echo json_encode(["success" => true,  "order_id" => $order_id, "email_sent" => $emailSent, "message" => "Order placed successfully."]);
 
 } catch (Exception $e) {
     mysqli_rollback($conn);
