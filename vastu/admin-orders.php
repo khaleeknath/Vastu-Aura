@@ -9,7 +9,7 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
-$adminName = $_SESSION['admin_name'] ?? 'Admin';
+$adminName = $_SESSION['name'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,23 +26,13 @@ $adminName = $_SESSION['admin_name'] ?? 'Admin';
 <body>
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <a class="logo-mark" href="index.php">VastuAura</a>
-      <nav>
-        <a class="active" href="admin-orders.php">Orders</a>
-        <a href="admin-appointments.php">Appointments</a>
-        <a href="admin-admins.php">Admins</a>
-        <a href="#" id="sidebarLogout">Logout</a>
-      </nav>
-    </aside>
+    
+  <?php include __DIR__ . '/admin-sidebar.php'; ?>
 
     <div class="admin-main">
       <header class="admin-topbar">
         <div class="hello-box">Hello <span id="adminGreeting"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8'); ?></span></div>
-        <div class="topbar-actions">
-          <a class="logo-mark small" href="index.php">VastuAura</a>
-          <button id="topbarLogout" class="btn btn-outline-brand" type="button">Logout</button>
-        </div>
+        
       </header>
 
       <main class="admin-content">

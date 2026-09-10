@@ -47,15 +47,7 @@ if (!$result) {
 <body>
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
   <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <a class="logo-mark" href="index.php">VastuAura</a>
-      <nav>
-        <a href="admin-orders.php">Orders</a>
-        <a class="active" href="admin-appointments.php">Appointments</a>
-        <a href="admin-admins.php">Admins</a>
-        <a href="" id="sidebarLogout">Logout</a>
-      </nav>
-    </aside>
+  <?php include __DIR__ . '/admin-sidebar.php'; ?>
 
     <div class="admin-main">
       <header class="admin-topbar">
@@ -65,10 +57,7 @@ if (!$result) {
     <?= isset($_SESSION['name']) ? htmlspecialchars($_SESSION['name']) : '' ?>
   </span>
 </div>
-        <div class="topbar-actions">
-          <a class="logo-mark small" href="index.php">VastuAura</a>
-          <button id="topbarLogout" class="btn btn-outline-brand" type="button">Logout</button>
-        </div>
+        
       </header>
 
       <main class="admin-content">

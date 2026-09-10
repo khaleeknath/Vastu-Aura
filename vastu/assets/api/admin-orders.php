@@ -10,8 +10,9 @@
 
 session_start();
 header('Content-Type: application/json; charset=utf-8');
+include('../config/db-conn.php');
+require_once('stock-ledger.php');
 
-include(__DIR__ . '/../config/db-conn.php');
 
 // ---- Auth guard ----
 if (empty($_SESSION['user_id'])) {
@@ -181,131 +182,379 @@ function handleList(mysqli $conn, array $allowedStatuses): void
     ]);
 }
 
+
 function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
 {
     $orderId = (int)($_POST['order_id'] ?? 0);
-    $status  = trim($_POST['status'] ?? '');
+    $newStatus = trim($_POST['status'] ?? '');
 
+    // -----------------------------------------
+    // Validate order ID
+    // -----------------------------------------
     if ($orderId <= 0) {
         http_response_code(422);
-        echo json_encode(['success' => false, 'message' => 'Invalid order ID.']);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid order ID.'
+        ]);
+
         return;
     }
 
-    if (!in_array($status, $allowedStatuses, true)) {
+    // -----------------------------------------
+    // Validate status
+    // -----------------------------------------
+    if (!in_array($newStatus, $allowedStatuses, true)) {
         http_response_code(422);
-        echo json_encode(['success' => false, 'message' => 'Invalid status value.']);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid status value.'
+        ]);
+
         return;
     }
 
-    $stmt = $conn->prepare('UPDATE tbl_orders SET status = ? WHERE id = ?');
-    $stmt->bind_param('si', $status, $orderId);
-    $stmt->execute();
-    $affected = $stmt->affected_rows;
-    $stmt->close();
+    // -----------------------------------------
+    // Get current order status
+    // -----------------------------------------
+    $orderStmt = $conn->prepare("
+        SELECT id, status
+        FROM tbl_orders
+        WHERE id = ?
+    ");
 
-    if ($affected === 0) {
-        // Either the order doesn't exist, or the status was already the same.
-        $check = $conn->prepare('SELECT id FROM tbl_orders WHERE id = ?');
-        $check->bind_param('i', $orderId);
-        $check->execute();
-        $exists = $check->get_result()->fetch_row();
-        $check->close();
+    if ($orderStmt === false) {
+        error_log(
+            "[order-status] Order SELECT prepare failed: "
+            . $conn->error
+        );
 
-        if (!$exists) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Order not found.']);
-            return;
-        }
+        http_response_code(500);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error.'
+        ]);
+
+        return;
     }
 
-    echo json_encode(['success' => true, 'message' => 'Order status updated.']);
+    $orderStmt->bind_param('i', $orderId);
+
+    if (!$orderStmt->execute()) {
+        error_log(
+            "[order-status] Order SELECT execute failed: "
+            . $orderStmt->error
+        );
+
+        $orderStmt->close();
+
+        http_response_code(500);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Could not fetch order.'
+        ]);
+
+        return;
+    }
+
+    $order = $orderStmt->get_result()->fetch_assoc();
+
+    $orderStmt->close();
+
+    // -----------------------------------------
+    // Check order exists
+    // -----------------------------------------
+    if (!$order) {
+        http_response_code(404);
+
+        echo json_encode([
+            'success' => false,
+            'message' => 'Order not found.'
+        ]);
+
+        return;
+    }
+
+    $currentStatus = trim($order['status']);
+
+    error_log(
+        "[order-status] Order #{$orderId} | "
+        . "Current: {$currentStatus} | "
+        . "New: {$newStatus}"
+    );
+
+    // -----------------------------------------
+    // Nothing to change
+    // -----------------------------------------
+    if ($currentStatus === $newStatus) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Order status is already ' . $newStatus . '.'
+        ]);
+
+        return;
+    }
+
+    // -----------------------------------------
+    // Determine whether stock needs deduction
+    // -----------------------------------------
+    $needsStockDeduction =
+        ($newStatus === 'Dispatched' && $currentStatus !== 'Dispatched');
+
+    error_log(
+        "[order-status] Stock deduction required: "
+        . ($needsStockDeduction ? 'YES' : 'NO')
+    );
+
+    // -----------------------------------------
+    // Start transaction
+    // -----------------------------------------
+    mysqli_begin_transaction($conn);
+
+    try {
+
+        // =========================================
+        // DEDUCT STOCK WHEN ORDER IS DISPATCHED
+        // =========================================
+        if ($needsStockDeduction) {
+
+            // -----------------------------------------
+            // Get order items
+            // -----------------------------------------
+            $itemStmt = $conn->prepare("
+                SELECT
+                    oi.product_id,
+                    oi.quantity,
+                    oi.price,
+                    p.name,
+                    p.stock
+                FROM tbl_order_items oi
+                INNER JOIN tbl_products p
+                    ON p.id = oi.product_id
+                WHERE oi.order_id = ?
+            ");
+
+            if ($itemStmt === false) {
+                throw new Exception(
+                    "Failed to prepare order items query: "
+                    . $conn->error
+                );
+            }
+
+            $itemStmt->bind_param('i', $orderId);
+
+            if (!$itemStmt->execute()) {
+                throw new Exception(
+                    "Failed to fetch order items: "
+                    . $itemStmt->error
+                );
+            }
+
+            $result = $itemStmt->get_result();
+
+            $items = [];
+
+            while ($row = $result->fetch_assoc()) {
+                $items[] = $row;
+            }
+
+            $itemStmt->close();
+
+            // -----------------------------------------
+            // Make sure order has items
+            // -----------------------------------------
+            if (empty($items)) {
+                throw new Exception(
+                    "No products found for order #{$orderId}."
+                );
+            }
+
+            // =========================================
+            // CHECK STOCK FIRST
+            // =========================================
+            foreach ($items as $item) {
+
+                $productId = (int)$item['product_id'];
+                $quantity  = (int)$item['quantity'];
+                $stock     = (int)$item['stock'];
+                $productName = $item['name'];
+
+                error_log(
+                    "[order-status] Product #{$productId} "
+                    . "{$productName} | "
+                    . "Stock: {$stock} | "
+                    . "Required: {$quantity}"
+                );
+
+                if ($stock < $quantity) {
+
+                    throw new Exception(
+                        "Insufficient stock for product: "
+                        . $productName
+                        . ". Available: "
+                        . $stock
+                        . ", Required: "
+                        . $quantity
+                    );
+                }
+            }
+
+            // =========================================
+            // DEDUCT STOCK
+            // =========================================
+            foreach ($items as $item) {
+
+                $productId = (int)$item['product_id'];
+                $quantity  = (int)$item['quantity'];
+
+                // -----------------------------------------
+                // Update product stock
+                // -----------------------------------------
+                $stockStmt = $conn->prepare("
+                    UPDATE tbl_products
+                    SET stock = stock - ?
+                    WHERE id = ?
+                      AND stock >= ?
+                ");
+
+                if ($stockStmt === false) {
+                    throw new Exception(
+                        "Failed to prepare stock update: "
+                        . $conn->error
+                    );
+                }
+
+                $stockStmt->bind_param(
+                    'iii',
+                    $quantity,
+                    $productId,
+                    $quantity
+                );
+
+                if (!$stockStmt->execute()) {
+
+                    $error = $stockStmt->error;
+
+                    $stockStmt->close();
+
+                    throw new Exception(
+                        "Failed to update stock for product #"
+                        . $productId
+                        . ": "
+                        . $error
+                    );
+                }
+
+                // Make sure stock was actually updated
+                if ($stockStmt->affected_rows === 0) {
+
+                    $stockStmt->close();
+
+                    throw new Exception(
+                        "Stock update failed for product #"
+                        . $productId
+                        . ". Insufficient stock."
+                    );
+                }
+
+                $stockStmt->close();
+
+                // -----------------------------------------
+                // Record stock movement
+                // -----------------------------------------
+                $adminId = (int)($_SESSION['user_id'] ?? 0);
+
+                recordStockMovement(
+                    $conn,
+                    $productId,
+                    'OUT',
+                    $quantity,
+                    "Order #{$orderId} dispatched",
+                    $adminId
+                );
+
+                error_log(
+                    "[order-status] Stock deducted successfully | "
+                    . "Product: {$productId} | "
+                    . "Quantity: {$quantity}"
+                );
+            }
+        }
+
+        // =========================================
+        // UPDATE ORDER STATUS
+        // =========================================
+        $statusStmt = $conn->prepare("
+            UPDATE tbl_orders
+            SET status = ?
+            WHERE id = ?
+        ");
+
+        if ($statusStmt === false) {
+            throw new Exception(
+                "Failed to prepare status update: "
+                . $conn->error
+            );
+        }
+
+        $statusStmt->bind_param(
+            'si',
+            $newStatus,
+            $orderId
+        );
+
+        if (!$statusStmt->execute()) {
+
+            $error = $statusStmt->error;
+
+            $statusStmt->close();
+
+            throw new Exception(
+                "Failed to update order status: "
+                . $error
+            );
+        }
+
+        $statusStmt->close();
+
+        // =========================================
+        // COMMIT
+        // =========================================
+        mysqli_commit($conn);
+
+        error_log(
+            "[order-status] Order #{$orderId} successfully "
+            . "changed from {$currentStatus} to {$newStatus}"
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Order status updated successfully.'
+        ]);
+
+    } catch (Throwable $e) {
+
+        // -----------------------------------------
+        // Rollback everything
+        // -----------------------------------------
+        mysqli_rollback($conn);
+
+        error_log(
+            "[order-status] ERROR for order #{$orderId}: "
+            . $e->getMessage()
+        );
+
+        http_response_code(409);
+
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+
+        return;
+    }
 }
-
-// function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
-// {
-//     $orderId = (int)($_POST['order_id'] ?? 0);
-//     $status  = trim($_POST['status'] ?? '');
-
-//     if ($orderId <= 0) {
-//         http_response_code(422);
-//         echo json_encode(['success' => false, 'message' => 'Invalid order ID.']);
-//         return;
-//     }
-
-//     if (!in_array($status, $allowedStatuses, true)) {
-//         http_response_code(422);
-//         echo json_encode(['success' => false, 'message' => 'Invalid status value.']);
-//         return;
-//     }
-
-//     // Fetch current order state first — we need payment_method and the
-//     // stock_deducted flag to decide whether this transition should touch stock.
-//     $orderStmt = $conn->prepare(
-//         'SELECT status, payment_method, stock_deducted FROM tbl_orders WHERE id = ?'
-//     );
-//     $orderStmt->bind_param('i', $orderId);
-//     $orderStmt->execute();
-//     $order = $orderStmt->get_result()->fetch_assoc();
-//     $orderStmt->close();
-
-//     if (!$order) {
-//         http_response_code(404);
-//         echo json_encode(['success' => false, 'message' => 'Order not found.']);
-//         return;
-//     }
-
-//     $isCod            = strtoupper($order['payment_method'] ?? '') === 'Cash on Delivery';
-//     $movingToDispatch = $status === 'Dispatched' && $order['status'] !== 'Dispatched';
-//     $needsStockDeduct = $isCod && $movingToDispatch && (int)$order['stock_deducted'] === 0;
-
-//     $adminId = (int)($_SESSION['user_id'] ?? 0);
-
-//     mysqli_begin_transaction($conn);
-//     try {
-//         if ($needsStockDeduct) {
-//             $itemsStmt = $conn->prepare(
-//                 'SELECT product_id, quantity FROM tbl_order_items WHERE order_id = ?'
-//             );
-//             $itemsStmt->bind_param('i', $orderId);
-//             $itemsStmt->execute();
-//             $items = $itemsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-//             $itemsStmt->close();
-
-//             if (empty($items)) {
-//                 throw new Exception("No line items found for order #{$orderId}; refusing to dispatch.");
-//             }
-
-//             foreach ($items as $item) {
-//                 // Will throw (and roll back everything, including the status
-//                 // update below) if any single product doesn't have enough stock.
-//                 recordStockMovement(
-//                     $conn,
-//                     (int)$item['product_id'],
-//                     'OUT',
-//                     (int)$item['quantity'],
-//                     "Order #{$orderId} dispatched (COD)",
-//                     $adminId
-//                 );
-//             }
-//         }
-
-//         // $setStockFlag = $needsStockDeduct ? ', stock_deducted = 1' : '';
-//         // $updateStmt = $conn->prepare(
-//         //     "UPDATE tbl_orders SET status = ? {$setStockFlag} WHERE id = ?"
-//         // );
-//         // $updateStmt->bind_param('si', $status, $orderId);
-//         // $updateStmt->execute();
-//         // $updateStmt->close();
-
-//         mysqli_commit($conn);
-//     } catch (Throwable $e) {
-//         mysqli_rollback($conn);
-//         http_response_code(409);
-//         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-        
-//         return;
-//     }
-
-//     echo json_encode(['success' => true, 'message' => 'Order status updated.']);
-// }
