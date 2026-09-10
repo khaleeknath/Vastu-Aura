@@ -16,6 +16,8 @@ $user_id = $_SESSION['user_id'];
 $data = json_decode(file_get_contents("php://input"), true);
 $paymentMethod = $data['payment_method'] ?? '';
 
+error_log("[mailer] Order data Php: " . print_r($data, true));
+
 $isOnlinePayment = in_array($paymentMethod, ['Card Payment', 'UPI']);
 $verifiedAmount = null;
 $razorpay_payment_id = null;
@@ -154,21 +156,21 @@ try {
     // Send order confirmation email AFTER order is successfully committed
     $emailData = [
         'order_id'            => $order_id,
-        'name'                => $_SESSION['user']['first_name'],
-        'email'               => $_SESSION['email'],
+        'name'                => $_SESSION['name'],
+        'email'               => $data['email'] ?? '',
+        'items'               => $emailItems,
         'order_date'          => date('Y-m-d H:i:s'),
         'payment_method'      => $paymentMethod,
         'razorpay_payment_id' => $razorpay_payment_id,
-        'items'               => $emailItems,
         'total'               => $total,
         'shipping'            => $shipping,
         'grand_total'         => $grandTotal
     ];
 
+   
+
     $emailSent = sendOrderConfirmationEmail($emailData);
 
-    // Order placed — deduct stock
-    recordStockMovement($conn, 101, 'OUT', 2, $order_id, $_SESSION['admin_id']);
     echo json_encode(["success" => true,  "order_id" => $order_id, "email_sent" => $emailSent, "message" => "Order placed successfully."]);
 
 } catch (Exception $e) {

@@ -71,6 +71,71 @@ document.getElementById('confirmAmount').innerText =`₹${halfAmount.toLocaleStr
 });
 
 
+const bookingEmailInput = document.getElementById('bookingEmail');
+const originalEmail = (bookingEmailInput?.dataset.original || '').trim().toLowerCase();
+let emailConfirmed = false;
+let pendingEmailValue = null;
+
+const emailChangeModalEl = document.getElementById('emailChangeModal');
+const emailChangeModal = emailChangeModalEl ? new bootstrap.Modal(emailChangeModalEl) : null;
+
+function emailNeedsConfirmation(val) {
+  return val.trim().toLowerCase() !== originalEmail
+      && !(emailConfirmed && pendingEmailValue === val.trim());
+}
+
+function askAboutEmailChange(newVal) {
+  document.getElementById('emailOld').textContent = originalEmail;
+  document.getElementById('emailNew').textContent = newVal;
+  pendingEmailValue = newVal;
+  emailChangeModal?.show();
+}
+
+bookingEmailInput?.addEventListener('blur', () => {
+  const val = bookingEmailInput.value.trim();
+  if (val && emailNeedsConfirmation(val)) askAboutEmailChange(val);
+});
+
+document.getElementById('emailChangeCancel')?.addEventListener('click', () => {
+  bookingEmailInput.value = originalEmail; // revert — don't touch tbl_user
+  emailConfirmed = false;
+  pendingEmailValue = null;
+  emailChangeModal?.hide();
+});
+
+document.getElementById('emailChangeConfirm')?.addEventListener('click', () => {
+  const newEmail = pendingEmailValue;
+  const btn = document.getElementById('emailChangeConfirm');
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  fetch('assets/api/update-email.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'email=' + encodeURIComponent(newEmail)
+  })
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Yes, update it';
+      if (data.status) {
+        emailConfirmed = true;
+        emailChangeModal?.hide();
+      } else {
+        alert(data.message || 'Could not update email.');
+        bookingEmailInput.value = originalEmail;
+        emailChangeModal?.hide();
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Yes, update it';
+      console.log('Network error updating email.');
+      bookingEmailInput.value = originalEmail;
+      emailChangeModal?.hide();
+    });
+});
+
 /* =========================================================================
    Razorpay payment + booking submission
    -------------------------------------------------------------------------
@@ -83,6 +148,12 @@ document.getElementById('confirmAmount').innerText =`₹${halfAmount.toLocaleStr
    ========================================================================= */
 
 document.getElementById("confirmSubmit").addEventListener("click", function () {
+
+  const currentEmail = bookingEmailInput.value.trim();
+  if (emailNeedsConfirmation(currentEmail)) {
+    askAboutEmailChange(currentEmail);
+    return; // stop here — resolve the email question first
+  }
 
   if (!agreeTermsCheckbox.checked) {
     agreeErrorMsg.classList.remove("d-none");

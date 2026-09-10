@@ -8,6 +8,40 @@ document.getElementById("checkLogout").addEventListener("click", function(e) {
   }
 });
 
+document.getElementById('emailChangeConfirm')?.addEventListener('click', () => {
+    const newEmail = pendingEmailValue;
+    const btn = document.getElementById('emailChangeConfirm');
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+  
+    fetch('assets/api/update-email.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'email=' + encodeURIComponent(newEmail)
+    })
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.textContent = 'Yes, update it';
+        if (data.status) {
+          emailConfirmed = true;
+          emailChangeModal?.hide();
+        } else {
+          alert(data.message || 'Could not update email.');
+          bookingEmailInput.value = originalEmail;
+          emailChangeModal?.hide();
+        }
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.textContent = 'Yes, update it';
+        console.log('Network error updating email.');
+        bookingEmailInput.value = originalEmail;
+        emailChangeModal?.hide();
+      });
+  });
+
+
 document.addEventListener("DOMContentLoaded", loadCheckoutSummary);
 
 function loadCheckoutSummary() {
@@ -51,7 +85,8 @@ function loadCheckoutSummary() {
 
             document.getElementById("checkoutTotal").innerHTML =
                 "₹" + (subtotal + 150);
-
+    // --- COD availability based on order total ---
+            toggleCOD(subtotal + 150);
         });
 
 }
@@ -74,6 +109,22 @@ document.getElementById("cancelOrder")
     .style.display="none";
 });
 
+
+function toggleCOD(orderTotal) {
+    const codOption = document.getElementById("codOption");
+    const codHint = document.getElementById("codHint");
+    const paymentSelect = document.getElementById("paymentMethod");
+
+    const codAllowed = orderTotal > 3000;
+
+    codOption.disabled = !codAllowed;
+    codHint.style.display = codAllowed ? "none" : "block";
+
+    // If COD was pre-selected but is no longer allowed, fall back to Card Payment
+    if (!codAllowed && paymentSelect.value === "Cash on Delivery") {
+        paymentSelect.value = "Card Payment";
+    }
+}
 
 // Confirm Order
 
@@ -115,6 +166,7 @@ document.getElementById("confirmOrder").addEventListener("click", async () => {
             handler: function (response) {
                 // Payment succeeded — now confirm + create the order server-side
                 placeOrder({
+                    email: document.getElementById("checkoutEmail").value ,
                     payment_method: paymentMethod,
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,

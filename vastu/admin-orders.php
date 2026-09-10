@@ -1,3 +1,16 @@
+<?php
+// admin-orders.php
+// Guards the page with an admin session check. Adjust the session key
+// names below to match whatever your login script (admin-login.php) sets.
+session_start();
+
+if (empty($_SESSION['user_id'])) {
+    header('Location: admin-login.php');
+    exit;
+}
+
+$adminName = $_SESSION['admin_name'] ?? 'Admin';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,16 +29,16 @@
     <aside class="admin-sidebar">
       <a class="logo-mark" href="index.php">VastuAura</a>
       <nav>
-        <a class="active" href="admin-orders.html">Orders</a>
+        <a class="active" href="admin-orders.php">Orders</a>
         <a href="admin-appointments.php">Appointments</a>
-        <a href="admin-admins.html">Admins</a>
+        <a href="admin-admins.php">Admins</a>
         <a href="#" id="sidebarLogout">Logout</a>
       </nav>
     </aside>
 
     <div class="admin-main">
       <header class="admin-topbar">
-        <div class="hello-box">Hello <span id="adminGreeting">Admin Anaya</span></div>
+        <div class="hello-box">Hello <span id="adminGreeting"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8'); ?></span></div>
         <div class="topbar-actions">
           <a class="logo-mark small" href="index.php">VastuAura</a>
           <button id="topbarLogout" class="btn btn-outline-brand" type="button">Logout</button>
@@ -64,14 +77,27 @@
               <label class="form-label">Product</label>
               <select id="orderProductFilter" class="form-select">
                 <option value="">All Products</option>
-                <option value="Brass Entrance Harmony Set">Brass Entrance Harmony Set</option>
-                <option value="Tranquil Lamp Diffuser">Tranquil Lamp Diffuser</option>
-                <option value="Compass Desk Tile">Compass Desk Tile</option>
+                <!-- Populated dynamically from the backend, but static
+                     fallbacks are fine to keep if you prefer them. -->
               </select>
             </div>
             <div class="col-md-3">
               <label class="form-label">Search</label>
               <input id="orderSearch" type="search" class="form-control" placeholder="Search customer or ID">
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-2">
+              <label class="form-label">Rows</label>
+              <select id="orderPageSize" class="form-select">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="col-md-10 d-flex align-items-end justify-content-end gap-2">
+              <button id="orderFilterClear" class="btn btn-outline-brand" type="button">Clear Filters</button>
             </div>
           </div>
         </section>
@@ -85,6 +111,7 @@
                   <th>Order ID</th>
                   <th>Customer</th>
                   <th>Product</th>
+                  <th>Amount</th>
                   <th>Date</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -92,6 +119,13 @@
               </thead>
               <tbody id="ordersTableBody"></tbody>
             </table>
+          </div>
+
+          <div class="pagination-bar d-flex justify-content-between align-items-center mt-3">
+            <div id="ordersResultInfo" class="result-info"></div>
+            <nav aria-label="Orders pagination">
+              <ul id="ordersPagination" class="pagination mb-0"></ul>
+            </nav>
           </div>
         </section>
       </main>

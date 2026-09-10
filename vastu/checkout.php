@@ -97,12 +97,15 @@ $phone = $_SESSION['phone'] ?? '';
                   <input id="checkoutPhone" class="form-control" type="tel" value="<?= htmlspecialchars($phone) ?>" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Payment Method</label>
-                  <select class="form-select">
-                    <option>Card Payment</option>
-                    <option>UPI</option>
-                    <option>Cash on Delivery</option>
-                  </select>
+                <label class="form-label">Payment Method</label>
+                <select class="form-select" id="paymentMethod">
+                  <option>Card Payment</option>
+                  <option>UPI</option>
+                  <option id="codOption" value="Cash on Delivery">Cash on Delivery</option>
+                </select>
+                <small id="codHint" class="text-muted" style="display:none;">
+                  Cash on Delivery is available for orders above ₹3000.
+                </small>
                 </div>
                 <div class="col-12">
                   <button class="btn btn-brand" type="submit">Place Order</button>
@@ -153,7 +156,7 @@ $phone = $_SESSION['phone'] ?? '';
         <div class="col-lg-3">
           <h3>Newsletter</h3>
           <form class="newsletter-form">
-            <input type="email" class="form-control" placeholder="Your email">
+            <input type="email"  class="form-control" placeholder="Your email">
             <button class="btn btn-brand w-100 mt-3" type="submit">Subscribe</button>
           </form>
         </div>
@@ -187,7 +190,6 @@ $phone = $_SESSION['phone'] ?? '';
     </div>
   </div>
 </div>
-
 
 <!-- Success Modal -->
 <div class="custom-modal-overlay" id="successModal">

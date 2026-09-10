@@ -171,10 +171,10 @@ function sendOrderConfirmationEmail(array $order): bool
 
         $mail->Subject = "Your VastuAura Order #{$order['order_id']} is Confirmed";
 
-        // $mail->Body = buildOrderConfirmationEmailHtml($order);
-        $mail->AltBody = buildOrderConfirmationEmailPlainText($order);
+        $mail->Body = buildOrderConfirmationEmailHtml($order);
+         $mail->AltBody = buildOrderConfirmationEmailPlainText($order);
 
-        error_log("[mailer] Plain text body built:\n" . $mail->AltBody);
+        error_log("[mailer] Plain text body built:\n" . $mail->Body);
 
         $mail->send();
 
@@ -204,43 +204,118 @@ function sendOrderConfirmationEmail(array $order): bool
 
 
 
-function buildOrderConfirmationEmailPlainText(array $o): string
+function buildOrderConfirmationEmailHtml(array $o): string
 {
-    $text = "Your VastuAura order is confirmed.\n\n";
-
-    $text .= "Order ID: #" . $o['order_id'] . "\n";
-    $text .= "Order Date: " . $o['order_date'] . "\n";
-    $text .= "Payment Method: " . $o['payment_method'] . "\n";
-
-    if (!empty($o['razorpay_payment_id'])) {
-        $text .= "Payment ID: " . $o['razorpay_payment_id'] . "\n";
+    $rows = '';
+    foreach ($o['items'] as $item) {
+        $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+        $rows .= '
+            <tr>
+                <td style="padding:10px; border-bottom:1px solid #eee;">' . htmlspecialchars($item['name']) . '</td>
+                <td style="padding:10px; border-bottom:1px solid #eee; text-align:center;">' . (int)$item['quantity'] . '</td>
+                <td style="padding:10px; border-bottom:1px solid #eee; text-align:right;">Rs. ' . number_format((float)$item['price'], 2) . '</td>
+                <td style="padding:10px; border-bottom:1px solid #eee; text-align:right;">Rs. ' . number_format($itemTotal, 2) . '</td>
+            </tr>';
     }
 
-    $text .= "\n-----------------------------\n";
-    $text .= "Order Items\n";
-    $text .= "-----------------------------\n";
+    $paymentIdRow = '';
+    if (!empty($o['razorpay_payment_id'])) {
+        $paymentIdRow = '<tr><td style="padding:4px 0; color:#555;">Payment ID</td><td style="padding:4px 0; text-align:right;">' . htmlspecialchars($o['razorpay_payment_id']) . '</td></tr>';
+    }
+
+    return '
+    <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; color:#333;">
+
+        <div style="background:#8a6d3b; padding:24px; text-align:center;">
+            <h1 style="color:#fff; margin:0; font-size:22px;">VastuAura</h1>
+            <p style="color:#f0e6d6; margin:6px 0 0;">Order Confirmed</p>
+        </div>
+
+        <div style="padding:24px; background:#ffffff;">
+            <p style="font-size:16px;">Hi ' . htmlspecialchars($o['name']) . ',</p>
+            <p>Thank you for your order! Here are your order details:</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; font-size:14px;">
+                <tr><td style="padding:4px 0; color:#555;">Order ID</td><td style="padding:4px 0; text-align:right;">#' . $o['order_id'] . '</td></tr>
+                <tr><td style="padding:4px 0; color:#555;">Order Date</td><td style="padding:4px 0; text-align:right;">' . htmlspecialchars($o['order_date']) . '</td></tr>
+                <tr><td style="padding:4px 0; color:#555;">Payment Method</td><td style="padding:4px 0; text-align:right;">' . htmlspecialchars($o['payment_method']) . '</td></tr>
+                ' . $paymentIdRow . '
+            </table>
+
+            <table style="width:100%; border-collapse:collapse; font-size:14px; margin-top:8px;">
+                <thead>
+                    <tr style="background:#f7f3ec;">
+                        <th style="padding:10px; text-align:left;">Product</th>
+                        <th style="padding:10px; text-align:center;">Qty</th>
+                        <th style="padding:10px; text-align:right;">Price</th>
+                        <th style="padding:10px; text-align:right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>' . $rows . '</tbody>
+            </table>
+
+            <table style="width:100%; border-collapse:collapse; font-size:14px; margin-top:16px;">
+                <tr><td style="padding:4px 0; color:#555;">Products Total</td><td style="padding:4px 0; text-align:right;">Rs. ' . number_format((float)$o['total'], 2) . '</td></tr>
+                <tr><td style="padding:4px 0; color:#555;">Shipping</td><td style="padding:4px 0; text-align:right;">Rs. ' . number_format((float)$o['shipping'], 2) . '</td></tr>
+                <tr>
+                    <td style="padding:10px 0 0; font-weight:bold; border-top:2px solid #8a6d3b;">Grand Total</td>
+                    <td style="padding:10px 0 0; font-weight:bold; text-align:right; border-top:2px solid #8a6d3b;">Rs. ' . number_format((float)$o['grand_total'], 2) . '</td>
+                </tr>
+            </table>
+
+            <p style="margin-top:24px;">We hope to see you again soon.</p>
+            <p style="color:#8a6d3b; font-weight:bold;">— Team VastuAura</p>
+        </div>
+
+    </div>';
+}
+
+function buildOrderConfirmationEmailPlainText(array $o): string
+{
+    $divider = str_repeat("=", 40) . "\n";
+    $subDivider = str_repeat("-", 40) . "\n";
+
+    $text  = $divider;
+    $text .= "        VASTUAURA - ORDER CONFIRMED\n";
+    $text .= $divider . "\n";
+
+    $text .= "Order ID       : #" . $o['order_id'] . "\n";
+    $text .= "Order Date     : " . $o['order_date'] . "\n";
+    $text .= "Payment Method : " . $o['payment_method'] . "\n";
+
+    if (!empty($o['razorpay_payment_id'])) {
+        $text .= "Payment ID     : " . $o['razorpay_payment_id'] . "\n";
+    }
+
+    $text .= "\n" . $subDivider;
+    $text .= "ORDER ITEMS\n";
+    $text .= $subDivider;
 
     foreach ($o['items'] as $item) {
 
         $itemTotal = (float)$item['price'] * (int)$item['quantity'];
 
-        $text .= "Product: " . $item['name'] . "\n";
-        $text .= "Quantity: " . $item['quantity'] . "\n";
-        $text .= "Price: Rs. " . number_format((float)$item['price'], 2) . "\n";
-        $text .= "Total: Rs. " . number_format($itemTotal, 2) . "\n";
-        $text .= "-----------------------------\n";
+        $text .= "\n" . $item['name'] . "\n";
+        $text .= "  Qty      : " . $item['quantity'] . "\n";
+        $text .= "  Price    : Rs. " . number_format((float)$item['price'], 2) . "\n";
+        $text .= "  Subtotal : Rs. " . number_format($itemTotal, 2) . "\n";
     }
 
-    $text .= "\nProducts Total: Rs. "
-        . number_format((float)$o['total'], 2);
+    $text .= "\n" . $subDivider;
 
-    $text .= "\nShipping: Rs. "
-        . number_format((float)$o['shipping'], 2);
+    $text .= str_pad("Products Total", 20) . ": Rs. "
+        . number_format((float)$o['total'], 2) . "\n";
 
-    $text .= "\nGrand Total: Rs. "
-        . number_format((float)$o['grand_total'], 2);
+    $text .= str_pad("Shipping", 20) . ": Rs. "
+        . number_format((float)$o['shipping'], 2) . "\n";
 
-    $text .= "\n\nThank you for shopping with VastuAura.";
+    $text .= str_pad("Grand Total", 20) . ": Rs. "
+        . number_format((float)$o['grand_total'], 2) . "\n";
+
+    $text .= "\n" . $divider;
+    $text .= "Thank you for shopping with VastuAura!\n";
+    $text .= "We hope to see you again soon.\n";
+    $text .= $divider;
 
     return $text;
 }

@@ -183,8 +183,7 @@ $phone = $_SESSION['phone'] ?? '';
                  </div>
                 <div class="col-md-6">
                   <label class="form-label">Email</label>
-                  <input id="bookingEmail" name="email" type="email" class="form-control" value="<?= htmlspecialchars($email) ?>" required>
-                </div>
+                  <input id="bookingEmail" name="email" type="email" class="form-control" value="<?= htmlspecialchars($email) ?>"data-original="<?= htmlspecialchars($email) ?>" required>                </div>
                 <div class="col-md-6">
                   <label class="form-label">Mobile Number</label>
                   <input id="bookingPhone" name="mobile" type="tel" class="form-control"  value="<?= htmlspecialchars($phone) ?>" required>
@@ -456,6 +455,28 @@ $phone = $_SESSION['phone'] ?? '';
 
         </div>
     </div>
+</div>
+
+
+<!-- Email Change Confirmation Modal -->
+<div class="modal fade" id="emailChangeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Registered Email?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>You registered with <strong id="emailOld"></strong>, but entered
+           <strong id="emailNew"></strong> for this booking.</p>
+        <p>Do you want to replace your account's registered email with this new one?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="emailChangeCancel">No, keep old email</button>
+        <button type="button" class="btn btn-success" id="emailChangeConfirm">Yes, update it</button>
+      </div>
+    </div>
+  </div>
 </div>
 
   <footer class="site-footer">

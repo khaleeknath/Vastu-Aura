@@ -16,9 +16,9 @@
     <aside class="admin-sidebar">
       <a class="logo-mark" href="index.php">VastuAura</a>
       <nav>
-        <a href="admin-orders.html">Orders</a>
+        <a href="admin-orders.php">Orders</a>
         <a href="admin-appointments.php">Appointments</a>
-        <a class="active" href="admin-admins.html">Admins</a>
+        <a class="active" href="admin-admins.php">Admins</a>
         <a href="#" id="sidebarLogout">Logout</a>
       </nav>
     </aside>

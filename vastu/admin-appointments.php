@@ -50,9 +50,9 @@ if (!$result) {
     <aside class="admin-sidebar">
       <a class="logo-mark" href="index.php">VastuAura</a>
       <nav>
-        <a href="admin-orders.html">Orders</a>
+        <a href="admin-orders.php">Orders</a>
         <a class="active" href="admin-appointments.php">Appointments</a>
-        <a href="admin-admins.html">Admins</a>
+        <a href="admin-admins.php">Admins</a>
         <a href="" id="sidebarLogout">Logout</a>
       </nav>
     </aside>
@@ -197,10 +197,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 </div>
 
 
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
-    <button id="saveAll" class="btn btn-success" type="submit">Save All</button>
-    <button id="cancelAll" class="btn btn-secondary">Cancel</button>
-</div>
+           
           </div>
         </section>
       </main>
