@@ -18,7 +18,7 @@
       <nav>
         <a href="admin-orders.php">Orders</a>
         <a href="admin-appointments.php">Appointments</a>
-        <a class="active" href="admin-admins.php">Admins</a>
+        <!-- <a class="active" href="admin-admins.php">Admins</a> -->
         <a href="#" id="sidebarLogout">Logout</a>
       </nav>
     </aside>

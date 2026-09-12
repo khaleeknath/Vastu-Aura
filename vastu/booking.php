@@ -520,6 +520,7 @@ $phone = $_SESSION['phone'] ?? '';
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="assets/js/booking.js"></script>
+  <script src="assets/js/common-modal.js"></script>
 
 </body>
 </html>

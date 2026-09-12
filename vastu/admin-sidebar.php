@@ -1,3 +1,4 @@
+
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
@@ -27,10 +28,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
         
 
-        <a href="#" id="sidebarLogout">
-            Logout
-        </a>
+        <a href="#"
+       class="dropdown-item  logout-btn"
+       data-logout-url="assets/api/logout.php">
+        🚪 Logout
+    </a>
 
     </nav>
 
 </aside>
+
+

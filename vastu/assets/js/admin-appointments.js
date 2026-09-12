@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Logout (unchanged, just guarded with ?.)
-    document.getElementById('sidebarLogout')?.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'assets/api/logout.php';
-        }
-    });
+    // document.getElementById('sidebarLogout')?.addEventListener('click', function (e) {
+    //     e.preventDefault();
+    //     if (confirm('Are you sure you want to logout?')) {
+    //         window.location.href = 'assets/api/logout.php';
+    //     }
+    // });
 });

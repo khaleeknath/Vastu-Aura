@@ -199,13 +199,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   
-    // ---------------- Logout (kept consistent with appointments page) ----------------
-    document.getElementById('sidebarLogout')?.addEventListener('click', function (e) {
-      e.preventDefault();
-      window.location.href = 'logout.php';
-    });
-    document.getElementById('topbarLogout')?.addEventListener('click', function () {
-      window.location.href = 'logout.php';
-    });
+   
   
   });

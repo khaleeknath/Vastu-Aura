@@ -29,8 +29,8 @@ if (mysqli_num_rows($result) > 0) {
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role_id']; 
                 $_SESSION['user'] = $user;
-                if ((int)$user['role_id'] === 1) {
-                    header("Location: ../../admin-admins.php");
+                if ((int)$user['role_id'] == 1) {
+                    header("Location: ../../admin-appointments.php");
                 } else {
                     header("Location: ../../index.php");
                 }
@@ -38,7 +38,13 @@ if (mysqli_num_rows($result) > 0) {
 
     } else {
         $_SESSION['login_error'] = "Invalid password.";
-        header("Location: ../../login.php");
+        if ((int)$user['role_id'] == 1) {
+            header("Location: ../../admin-login.php");
+        } else {
+            header("Location: ../../login.php");
+        }
+
+        
         exit;
     }
 
