@@ -82,15 +82,12 @@ if (!isset($_SESSION['user_id'])) {
 
     <section class="section-shell">
       <div class="container">
-        <div class="toolbar">
-          <div class="filter-group">
-            <button class="filter-btn active" data-category="all">All Products</button>
-            <button class="filter-btn" data-category="entry">Entry</button>
-            <button class="filter-btn" data-category="wellness">Wellness</button>
-            <button class="filter-btn" data-category="workspace">Workspace</button>
-          </div>
-          <a class="text-link" href="product-detail.html">Featured Product Detail</a>
-        </div>
+      <div class="toolbar">
+  <div class="filter-group" id="categoryFilterGroup">
+    <button class="filter-btn active" data-category-id="0">All Products</button>
+    <!-- category buttons injected here by JS -->
+  </div>
+</div>
 
         <div class="row g-4" id="productGrid">
           

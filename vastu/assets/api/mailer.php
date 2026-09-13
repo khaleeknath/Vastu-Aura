@@ -400,4 +400,81 @@ function buildStatusUpdateEmailPlainText(array $b): string
 }
 
 
+/**
+ * Sends a status-update email to the customer when an admin changes
+ * their order status (Pending / On Hold / Dispatched / Cancelled).
+ * Returns true/false. Never throws.
+ */
+function sendOrderStatusUpdateEmail(array $order): bool
+{
+    $mail = getConfiguredMailer();
+    if ($mail === null) return false;
+
+    error_log("[mailer] Attempting to send order status update email to: "
+        . $order['email'] . " | order #" . $order['order_id']
+        . " | status: " . ($order['status'] ?? 'unknown'));
+
+    try {
+        $mail->addAddress($order['email'], $order['name']);
+        $mail->Subject = "Update on your VastuAura Order #{$order['order_id']} - " . $order['status'];
+
+        $mail->Body    = buildOrderStatusUpdateEmailHtml($order);
+        $mail->AltBody = buildOrderStatusUpdateEmailPlainText($order);
+
+        $mail->send();
+        error_log("[mailer] SUCCESS: Order status update email sent to "
+            . $order['email'] . " (order #" . $order['order_id'] . ", status: " . $order['status'] . ")");
+        return true;
+    } catch (PHPMailerException $e) {
+        error_log("[mailer] FAILED to send order status update email to "
+            . $order['email'] . " | Error: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+
+function orderStatusColor(string $status): string
+{
+    $colors = [
+        'Dispatched' => '#2e7d32',
+        'Cancelled'  => '#c62828',
+        'On Hold'    => '#8a6d3b',
+        'Pending'    => '#b58b00',
+    ];
+    return $colors[$status] ?? '#b58b00';
+}
+
+function buildOrderStatusUpdateEmailHtml(array $o): string
+{
+    $status = $o['status'] ?? 'Pending';
+    $color  = orderStatusColor($status);
+
+    return "
+    <div style='font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #2c2620;'>
+        <h2 style='color:#8a6d3b;'>Order Update</h2>
+        <p>Hi " . e($o['name']) . ",</p>
+        <p>The status of your order <strong>#" . e((string)$o['order_id']) . "</strong> with <strong>VastuAura</strong> has been updated to:</p>
+        <p style='margin:16px 0;'>
+            <span style='display:inline-block; padding:6px 14px; border-radius:20px; background:" . $color . "; color:#fff; font-weight:600;'>" . e($status) . "</span>
+        </p>
+        <table style='width:100%; border-collapse: collapse;'>
+            " . (!empty($o['order_date']) ? "<tr><td style='padding:6px 0; color:#7a7368;'>Order Date</td><td style='padding:6px 0;'><strong>" . e($o['order_date']) . "</strong></td></tr>" : "") . "
+            " . (!empty($o['total_amount']) ? "<tr><td style='padding:6px 0; color:#7a7368;'>Order Total</td><td style='padding:6px 0;'><strong>Rs. " . e(number_format((float)$o['total_amount'], 2)) . "</strong></td></tr>" : "") . "
+        </table>
+        <p style='margin-top:24px;'>If you have any questions, just reply to this email.</p>
+        <p style='color:#7a7368; font-size:.85rem;'>— The VastuAura Team</p>
+    </div>";
+}
+
+function buildOrderStatusUpdateEmailPlainText(array $o): string
+{
+    $status = $o['status'] ?? 'Pending';
+
+    $text = "Your VastuAura order #{$o['order_id']} status has been updated to: {$status}\n\n";
+    if (!empty($o['order_date']))   $text .= "Order Date: {$o['order_date']}\n";
+    if (!empty($o['total_amount'])) $text .= "Order Total: Rs. " . number_format((float)$o['total_amount'], 2) . "\n";
+
+    return $text;
+}
+
+
 

@@ -12,7 +12,7 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 include('../config/db-conn.php');
 require_once('stock-ledger.php');
-
+require_once('mailer.php');
 
 // ---- Auth guard ----
 if (empty($_SESSION['user_id'])) {
@@ -530,6 +530,19 @@ function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
             "[order-status] Order #{$orderId} successfully "
             . "changed from {$currentStatus} to {$newStatus}"
         );
+
+
+        // Notify the customer by email (best-effort — never blocks
+        // the response or fails the request if email sending fails).
+        // -----------------------------------------
+        sendOrderStatusUpdateEmail([
+            'order_id'     => $orderId,
+            'name'         => trim($order['customer_name']),
+            'email'        => $order['email'],
+            'status'       => $newStatus,
+            'order_date'   => $order['order_date'],
+            'total_amount' => $order['total_amount'],
+        ]);
 
         echo json_encode([
             'success' => true,
