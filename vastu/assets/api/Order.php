@@ -133,7 +133,10 @@ try {
     $stmt = $conn->prepare("DELETE FROM tbl_cart WHERE user_id=?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
+    $stmt->close();
 
+    // Update session cart count
+    $_SESSION['cart_count'] = 0;
     mysqli_commit($conn);
 
     // ---- Separate query, just for the email: fetch the order's items WITH product names ----

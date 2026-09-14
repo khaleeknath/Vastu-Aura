@@ -26,6 +26,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             Inventory
         </a>
 
+        <a href="admin-enquiries.php"
+           class="<?= $currentPage === 'admin-enquiries.php' ? 'active' : '' ?>">
+            Enquiries
+        </a>
+
+        <a href="admin-subscribe.php"
+           class="<?= $currentPage === 'admin-subscribe.php' ? 'active' : '' ?>">
+            Letters Subscribe
+        </a>
+
         
 
         <a href="#"
@@ -37,5 +47,4 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </nav>
 
 </aside>
-
 

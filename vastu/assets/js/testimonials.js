@@ -1,49 +1,96 @@
-const testimonialUser = JSON.parse(localStorage.getItem("vastuUser") || "null");
-const testimonialAuthLink = document.querySelector("[data-nav-auth]");
-const testimonialBackToTop = document.getElementById("backToTop");
-const testimonialButtons = document.querySelectorAll(".filter-btn");
-const testimonialItems = document.querySelectorAll(".testimonial-item");
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Sleek Navbar & Scroll Progress Handlers
+  const navbar = document.getElementById("siteNavbar");
+  const progressBar = document.getElementById("scrollProgress");
+  const backToTopBtn = document.getElementById("backToTop");
 
-if (testimonialUser && testimonialAuthLink) {
-  testimonialAuthLink.textContent = testimonialUser.firstName;
-  testimonialAuthLink.href = "booking.php";
-}
+  const handleScroll = () => {
+    if (navbar) {
+      if (window.scrollY > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    }
 
-window.addEventListener("scroll", () => {
-  testimonialBackToTop.classList.toggle("show", window.scrollY > 280);
-});
+    // Scroll Progress Bar calculation
+    if (progressBar) {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      progressBar.style.width = scrolled + "%";
+    }
 
-testimonialBackToTop?.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+    // Back to Top Button visibility
+    if (backToTopBtn) {
+      if (window.scrollY > 280) {
+        backToTopBtn.classList.add("show");
+      } else {
+        backToTopBtn.classList.remove("show");
+      }
+    }
+  };
 
-testimonialButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    testimonialButtons.forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    const filter = button.dataset.filter;
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  handleScroll(); // init on load
 
-    testimonialItems.forEach((item) => {
-      const isVisible = filter === "all" || item.dataset.group === filter;
-      item.style.display = isVisible ? "block" : "none";
+  // Back to Top Action
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  // 2. Intersection Observer Reveal Logic (Matches Store Page)
+  const revealElements = document.querySelectorAll(".reveal-up");
+  const revealOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("active");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, revealOptions);
+
+  revealElements.forEach((el) => revealObserver.observe(el));
+
+  // 3. Auto-close mobile navbar on link click
+  const navLinks = document.querySelectorAll(
+    ".navbar-nav .nav-link:not(.dropdown-toggle)",
+  );
+  const navbarCollapse = document.getElementById("siteNav");
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (navbarCollapse && navbarCollapse.classList.contains("show")) {
+        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) bsCollapse.hide();
+      }
+    });
+  });
+
+  // 4. Testimonials Filtering Logic
+  const filterBtns = document.querySelectorAll(".btn-filter");
+  const testimonialItems = document.querySelectorAll(".testimonial-item");
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // Manage active states
+      filterBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const filter = btn.dataset.filter;
+
+      // Filter grid items natively
+      testimonialItems.forEach((item) => {
+        const isVisible = filter === "all" || item.dataset.group === filter;
+        item.style.display = isVisible ? "block" : "none";
+      });
     });
   });
 });
-
-document.querySelectorAll(".newsletter-form").forEach((form) => {
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    form.querySelector("button").textContent = "Subscribed";
-  });
-});
-
-if (window.anime) {
-  anime({
-    targets: ".hero-shell .eyebrow, .hero-shell h1, .hero-shell p, .filter-btn, .testimonial-card, .metric-card",
-    translateY: [26, 0],
-    opacity: [0, 1],
-    delay: anime.stagger(70),
-    duration: 800,
-    easing: "easeOutQuad"
-  });
-}

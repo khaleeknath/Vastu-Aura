@@ -23,17 +23,25 @@ $adminName = $_SESSION['name'] ?? 'Admin';
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/admin-orders.css">
   <?php include 'common-modal.php'; ?>
+
 </head>
 <body>
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Tapping the backdrop closes the off-canvas sidebar on mobile -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
   <div class="admin-layout">
-    
+
   <?php include __DIR__ . '/admin-sidebar.php'; ?>
 
     <div class="admin-main">
       <header class="admin-topbar">
-        <div class="hello-box">Hello <span id="adminGreeting"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8'); ?></span></div>
-        
+        <div class="d-flex align-items-center gap-2">
+          <button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="Toggle navigation" aria-controls="sidebarNav" aria-expanded="false">☰</button>
+          <div class="hello-box">Hello <span id="adminGreeting"><?php echo htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8'); ?></span></div>
+        </div>
+
       </header>
 
       <main class="admin-content">
@@ -46,7 +54,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
 
         <section class="filter-card">
           <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <label class="form-label">Status</label>
               <select id="orderStatusFilter" class="form-select">
                 <option value="">All Statuses</option>
@@ -56,15 +64,15 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                 <option value="Cancelled">Cancelled</option>
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="form-label">From</label>
               <input id="orderDateFrom" type="date" class="form-control">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="form-label">To</label>
               <input id="orderDateTo" type="date" class="form-control">
             </div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="form-label">Product</label>
               <select id="orderProductFilter" class="form-select">
                 <option value="">All Products</option>
@@ -72,13 +80,13 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                      fallbacks are fine to keep if you prefer them. -->
               </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
               <label class="form-label">Search</label>
               <input id="orderSearch" type="search" class="form-control" placeholder="Search customer or ID">
             </div>
           </div>
           <div class="row g-3 mt-1">
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
               <label class="form-label">Rows</label>
               <select id="orderPageSize" class="form-select">
                 <option value="10">10</option>
@@ -87,7 +95,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                 <option value="100">100</option>
               </select>
             </div>
-            <div class="col-md-10 d-flex align-items-end justify-content-end gap-2">
+            <div class="col-6 col-md-10 d-flex align-items-end justify-content-end gap-2">
               <button id="orderFilterClear" class="btn btn-outline-brand" type="button">Clear Filters</button>
             </div>
           </div>

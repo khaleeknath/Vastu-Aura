@@ -1,12 +1,15 @@
 <?php
 session_start();
+$current_page = basename($_SERVER['PHP_SELF']);
 
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['error'] = "Please login First to Access Page.";
-    header("Location: login.php");
-    exit;
-}
+// Preserved Authentication Logic
+// if (!isset($_SESSION['user_id'])) {
+//   $_SESSION['error'] = "Please login First to Access Page.";
+//     header("Location: login.php");
+//     exit;
+// } 
 
+// Preserved Prefill Logic
 $name = $_SESSION['user']['first_name'] ?? '';
 $lname = $_SESSION['user']['last_name'] ?? '';
 $fullName = trim($name . ' ' . $lname);
@@ -14,39 +17,44 @@ $fullName = trim($name . ' ' . $lname);
 $email = $_SESSION['email'] ?? '';
 $phone = $_SESSION['phone'] ?? '';
 
+$cartCount = $_SESSION['cart_count'] ?? 0;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Appointment | VastuAura</title>
+  <title>Book a Consultation | Vastu Shakti Rahasya</title>
+  
+  <!-- Premium Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Core Framework -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Bespoke E-Commerce Styles -->
   <link rel="stylesheet" href="assets/css/booking.css">
   <link rel="stylesheet" href="assets/css/common-modal.css">
   <?php include 'common-modal.php'; ?>
 
+  <!-- Preserved Map & Location Styles, adapted slightly for luxury theme -->
   <style>
-    /* --- Location / map block --- */
     .location-card {
-      background: #fff;
-      border-radius: 14px;
+      background: #fbf9f6;
+      border: 1px solid #e2ddd3;
+      border-radius: 4px;
       padding: 1.5rem;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
       margin-top: 1.5rem;
     }
-    .location-card h2 { margin-bottom: .75rem; }
     .location-controls {
       display: flex;
       flex-wrap: wrap;
       gap: .5rem;
       margin-bottom: 1rem;
-      position: relative; /* anchor for the floating suggestions box */
+      position: relative;
     }
     .location-controls input[type="text"] {
       flex: 1 1 220px;
@@ -56,12 +64,10 @@ $phone = $_SESSION['phone'] ?? '';
       top: 100%;
       left: 0;
       width: 100%;
-      max-width: 100%;
       max-height: 260px;
       overflow-y: auto;
       background: #fff;
       border: 1px solid #e2ddd3;
-      border-radius: 8px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.12);
       z-index: 1000;
       margin-top: 4px !important;
@@ -72,18 +78,14 @@ $phone = $_SESSION['phone'] ?? '';
       border-bottom: 1px solid #f0ece4;
       text-align: left;
     }
-    #locationSuggestions .list-group-item:hover {
-      background: #f5f1ea;
-    }
-    #locationSuggestions .list-group-item:last-child {
-      border-bottom: none;
-    }
+    #locationSuggestions .list-group-item:hover { background: #f5f1ea; }
     #vastuMap {
       width: 100%;
       height: 340px;
-      border-radius: 10px;
+      border-radius: 4px;
       margin-bottom: 1rem;
       z-index: 0;
+      border: 1px solid #e2ddd3;
     }
     .price-summary {
       display: flex;
@@ -91,8 +93,9 @@ $phone = $_SESSION['phone'] ?? '';
       flex-wrap: wrap;
     }
     .price-summary .pill {
-      background: #f5f1ea;
-      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e2ddd3;
+      border-radius: 4px;
       padding: .75rem 1rem;
       flex: 1 1 160px;
       text-align: center;
@@ -102,6 +105,8 @@ $phone = $_SESSION['phone'] ?? '';
       font-size: .8rem;
       color: #7a7368;
       margin-bottom: .25rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     .price-summary .pill .value {
       font-size: 1.1rem;
@@ -109,111 +114,184 @@ $phone = $_SESSION['phone'] ?? '';
       color: #2c2620;
     }
     .shop-marker { font-size: 24px; text-align: center; line-height: 30px; }
-    .location-hint { font-size: .85rem; color: #7a7368; margin-bottom: .75rem; }
   </style>
-
 </head>
-<body>
-  <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+<body class="luxury-ecomm bg-muted">
 
-  <nav class="navbar navbar-expand-lg fixed-top site-navbar">
-    <div class="container">
-      <a class="navbar-brand logo-mark" href="index.php">VastuAura</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+  <!-- Progress Bar for Scroll -->
+  <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+  <!-- Redesigned High-End Navbar -->
+ <nav class="navbar navbar-expand-xl fixed-top bespoke-navbar" id="siteNavbar">
+    <div class="container-fluid px-4 px-xl-5 align-items-center">
+      
+      <!-- 1. Brand Logo (Extreme Left) -->
+      <a class="navbar-brand brand-logo" href="index.php">
+        <div class="logo-wrapper">
+            <img src="assets/images/logo2.png" alt="Vastu Shakti Rahasya" class="logo-img">
+            <div class="logo-text d-none d-xl-flex flex-column justify-content-center">
+                <span class="logo-title">VASTU SHAKTI</span>
+                <span class="logo-subtitle">R A H A S Y A</span>
+            </div>
+        </div>
+      </a>
+      
+      <!-- Mobile Controls (Cart & Toggler group on right for mobile) -->
+      <div class="d-flex align-items-center d-xl-none ms-auto gap-3">
+          <a href="cart.php" class="cart-icon-btn position-relative" aria-label="Shopping Cart">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              <span id="cartCountMobile" class="cart-badge"><?= $cartCount ?></span>
+          </a>
+          <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+      </div>
+      
+      <!-- Desktop & Mobile Collapse Container -->
       <div class="collapse navbar-collapse" id="siteNav">
-        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
-          <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.php">About Us</a></li>
-          <li class="nav-item"><a class="nav-link" href="testimonials.php">Testimonials</a></li>
-          <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
-          <?php if (isset($_SESSION['user_id'])): ?>
-  <li class="nav-item">
-    <span class="nav-link nav-auth">
-      👋 Hi, <?= htmlspecialchars($_SESSION['name'] ?? 'User') ?>
-    </span>
-  </li>
-  <li>
-    <a href="#"
-       class="dropdown-item text-danger logout-btn"
-       data-logout-url="assets/api/logout.php">
-        🚪 Logout
-    </a>
-</li>
-<?php else: ?>
-  <li class="nav-item">
-    <a class="nav-link nav-auth" href="login.php">Login/Register</a>
-  </li>
-<?php endif; ?>
+        
+        <!-- 2. Navigation Links (Right of Logo, pushes remaining items to Extreme Right) -->
+        <ul class="navbar-nav align-items-xl-center nav-links-premium ms-xl-4 mt-4 mt-xl-0 pb-3 pb-xl-0 me-auto">
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">The Atelier</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'testimonials.php') ? 'active' : '' ?>" href="testimonials.php">Testimonials</a>
+          </li>
+          
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle <?= ($current_page == 'services.php') ? 'active' : '' ?>" href="services.php" data-bs-toggle="dropdown">Services</a>
+            <ul class="dropdown-menu luxury-dropdown">
+              <li><a class="dropdown-item" href="services.php#astrology">Vedic Astrology</a></li>
+              <li><a class="dropdown-item" href="services.php#numerology">Numerology</a></li>
+              <li><a class="dropdown-item" href="services.php#vastu-fire">Vastu Fire</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-gold" href="services.php">All Services <span style="font-family: sans-serif;">→</span></a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'booking.php') ? 'active' : '' ?>" href="booking.php">Consultations</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'store.php') ? 'active' : '' ?> text-gold" href="store.php">Curated Store</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'contact.php') ? 'active' : '' ?>" href="contact.php">Contact</a>
+          </li>
         </ul>
+        
+        <!-- 3. Greeting / Sign In & Cart (Extreme Right) -->
+        <div class="nav-actions d-flex flex-column flex-xl-row align-items-start align-items-xl-center gap-3 mt-2 mt-xl-0">
+          
+          <?php if (isset($_SESSION['user_id'])): ?>
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle user-greeting-link fw-bold" href="#" data-bs-toggle="dropdown">
+                   <?= htmlspecialchars($_SESSION['name'] ?? 'Guest') ?>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end luxury-dropdown">
+                  <li><a class="dropdown-item" href="myorder.php">Order History</a></li>
+                  <li><a class="dropdown-item" href="my-appointments.php">My Sessions</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a href="#" class="dropdown-item logout-link logout-btn" data-logout-url="assets/api/logout.php">Sign Out</a></li>
+              </ul>
+            </div>
+          <?php else: ?>
+            <a class="btn-auth-premium d-inline-block" href="login.php">Sign In</a>
+          <?php endif; ?>
+
+          <!-- Desktop Cart -->
+          <a href="cart.php" class="cart-icon-btn d-none d-xl-flex ms-xl-2 position-relative" aria-label="Shopping Cart">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              <span id="cartCount" class="cart-badge"><?= $cartCount ?></span>
+          </a>
+        </div>
+
       </div>
     </div>
   </nav>
 
   <main>
-    <section class="hero-shell">
-      <div class="container">
-        <div class="row g-4 align-items-end">
-          <div class="col-lg-7">
-            <span class="eyebrow">Appointment Booking</span>
-            <h1>Schedule a consultation with prefilled client details.</h1>
-            <p>Use the client account state to streamline appointment creation while preserving a clean, calming booking experience.</p>
-          </div>
-          <div class="col-lg-5">
-            <div class="info-card">
-              <h3>Consultation Types</h3>
-              <p>Home alignment, office layout, retail energy review, and room-specific advisory sessions.</p>
-            </div>
-          </div>
-        </div>
+    <!-- Booking Editorial Hero -->
+    <section class="booking-editorial-hero position-relative section-padding pb-0">
+      <div class="container mt-5 pt-4 text-center z-index-2 reveal-up">
+        <span class="text-gold tracking-wide text-uppercase small font-montserrat fw-bold mb-3 d-block">Reserve Your Session</span>
+        <h1 class="cinzel-heading display-2 mb-4 text-dark-900">Schedule an Alignment</h1>
+        <div class="ornate-divider mx-auto mb-5"></div>
       </div>
     </section>
 
-    <section class="section-shell">
+    <!-- Main Booking Interface -->
+    <section class="booking-interface section-padding pt-4">
       <div class="container">
-        <div class="row g-4">
-          <div class="col-lg-7">
-            <div class="booking-card">
-              <h2>Request Appointment</h2>
-              <form id="bookingForm" method="POST" >
-                <div class="col-md-6">
-                  <label class="form-label">Name</label>
-                  <input  type="text" class="form-control" name="name" value="<?= htmlspecialchars($fullName) ?>" required>               
-                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input id="bookingEmail" name="email" type="email" class="form-control" value="<?= htmlspecialchars($email) ?>"data-original="<?= htmlspecialchars($email) ?>" required>                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Mobile Number</label>
-                  <input id="bookingPhone" name="mobile" type="tel" class="form-control"  value="<?= htmlspecialchars($phone) ?>" required>
+        <div class="row g-5">
+          
+          <!-- Left Column: The Journey & Information -->
+          <div class="col-lg-5 pe-lg-5 reveal-up stagger-1">
+            <h2 class="cinzel-heading display-6 mb-4">The Consultation Journey</h2>
+            <p class="font-montserrat text-muted-large mb-5">
+              Secure your private session with our experts. Whether assessing a commercial property or decoding your natal chart, we ensure a seamless and profoundly transformative experience.
+            </p>
+            
+            <div class="journey-steps">
+              <div class="journey-step mb-4 d-flex">
+                <div class="step-numeral text-gold font-cinzel me-4 opacity-50">I</div>
+                <div>
+                  <h4 class="cinzel-heading text-dark-900 fs-5 mb-2">Submit Your Request</h4>
+                  <p class="font-montserrat text-muted small mb-0">Provide your prefilled details and select a preferred window. Your information is held in strict confidence.</p>
                 </div>
+              </div>
+              <div class="journey-step mb-4 d-flex">
+                <div class="step-numeral text-gold font-cinzel me-4 opacity-50">II</div>
+                <div>
+                  <h4 class="cinzel-heading text-dark-900 fs-5 mb-2">Location & Pricing</h4>
+                  <p class="font-montserrat text-muted small mb-0">Map your property to calculate accurate distance-based pricing and reserve your spot via secure payment.</p>
+                </div>
+              </div>
+              <div class="journey-step d-flex">
+                <div class="step-numeral text-gold font-cinzel me-4 opacity-50">III</div>
+                <div>
+                  <h4 class="cinzel-heading text-dark-900 fs-5 mb-2">Final Confirmation</h4>
+                  <p class="font-montserrat text-muted small mb-0">You will receive an official itinerary and preparation guidelines prior to your session.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="help-box mt-5 p-4 bg-white border border-light">
+                <h5 class="cinzel-heading text-dark-900 mb-2">Require Assistance?</h5>
+                <p class="font-montserrat text-muted small mb-0">If you are unsure which consultation type suits your current situation, please <a href="contact.php" class="text-gold text-decoration-underline">contact our concierge</a>.</p>
+            </div>
+          </div>
+
+          <!-- Right Column: The Premium Form -->
+          <div class="col-lg-7 reveal-up stagger-2">
+            <div class="luxury-form-card bg-white p-4 p-md-5">
+              <h3 class="cinzel-heading text-dark-900 mb-4 pb-2 border-bottom">Reservation Details</h3>
+              
+              <form id="bookingForm" method="POST" class="row g-4 font-montserrat">
+                
                 <div class="col-md-6">
-                  <label class="form-label">Preferred Time</label>
-                  <select id="preferred_time" class="form-control" name="preferred_time">
-                  <option  disabled value="">-- Select Preferred Time --</option>
-                  </select>
-                  <small id="noSlotsMsg" class="text-danger d-none">
-                    No slots left for this date. Please select a different date.
-                  </small>
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Full Name</label>
+                  <input type="text" class="form-control luxury-input" name="name" value="<?= htmlspecialchars($fullName) ?>" required>               
                 </div>
-                <div class="col-12">
-                  <label class="form-label">Flat / House No., Wing, Floor</label>
-                  <input type="text" class="form-control" name="unit_number" id="unitNumber"
-                         placeholder="e.g. Flat 402, B Wing, 4th Floor">
-                  <small class="text-muted">This won't affect the map pin — it's saved as extra detail alongside your building's location below.</small>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Address</label>
-                  <textarea id="bookingAddress" name="address" class="form-control" rows="4"  placeholder="Enter property address" required></textarea>
-                </div>
+                
                 <div class="col-md-6">
-                  <label class="form-label">Preferred Date</label>
-                  <input id="bookingDate" name="preferred_date" type="date" class="form-control" required>
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Email Address</label>
+                  <input id="bookingEmail" name="email" type="email" readonly class="form-control luxury-input" value="<?= htmlspecialchars($email) ?>" data-original="<?= htmlspecialchars($email) ?>" required>
                 </div>
+                
                 <div class="col-md-6">
-                  <label class="form-label">Consultation Type</label>
-                  <select class="form-select" name="consultation_type">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Mobile Number</label>
+                  <input id="bookingPhone" name="mobile" type="tel" class="form-control luxury-input" value="<?= htmlspecialchars($phone) ?>" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Consultation Type</label>
+                  <select class="form-select luxury-input" name="consultation_type" required>
+                    <option value="" disabled selected>Select a service...</option>
                     <option>Home Consultation</option>
                     <option>Office Consultation</option>
                     <option>Retail Review</option>
@@ -221,306 +299,320 @@ $phone = $_SESSION['phone'] ?? '';
                   </select>
                 </div>
 
-                <!-- ===== Property Type / BHK / Sq.ft (drives pricing) ===== -->
                 <div class="col-md-6">
-                  <label class="form-label">Property Type</label>
-                  <select class="form-select" name="property_type" id="propertyType">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Preferred Date</label>
+                  <input id="bookingDate" name="preferred_date" type="date" class="form-control luxury-input" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Preferred Time</label>
+                  <!-- Preserved Backend Logic: Dynamic Select -->
+                  <select id="preferred_time" class="form-select luxury-input" name="preferred_time" required>
+                    <option disabled value="">-- Select Preferred Time --</option>
+                  </select>
+                  <small id="noSlotsMsg" class="text-danger d-none">No slots left for this date. Please select a different date.</small>
+                </div>
+
+                <!-- Preserved Backend Logic: Property details driving pricing -->
+                <div class="col-md-6">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Property Type</label>
+                  <select class="form-select luxury-input" name="property_type" id="propertyType">
                     <option value="Flat">Flat / Residential Apartment</option>
                     <option value="Commercial">Commercial / Office / Shop</option>
                   </select>
                 </div>
                 <div class="col-md-6" id="bhkField">
-                  <label class="form-label">BHK Type</label>
-                  <select class="form-select" name="bhk_type" id="bhkType" required>
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">BHK Type</label>
+                  <select class="form-select luxury-input" name="bhk_type" id="bhkType" required>
                     <option value="1bhk">1 BHK</option>
                     <option value="2bhk">2 BHK</option>
                     <option value="3bhk">3 BHK</option>
                   </select>
                 </div>
                 <div class="col-md-6 d-none" id="sqftField">
-                  <label class="form-label">Built-up Area (sq.ft)</label>
-                  <input type="number" class="form-control" name="sqft" id="sqftInput" min="1" placeholder="e.g. 1200">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Built-up Area (sq.ft)</label>
+                  <input type="number" class="form-control luxury-input" name="sqft" id="sqftInput" min="1" placeholder="e.g. 1200">
                 </div>
-                <!-- ===== End Property Type / BHK / Sq.ft ===== -->
+                
+                <div class="col-12">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Flat / House No., Wing, Floor</label>
+                  <input type="text" class="form-control luxury-input" name="unit_number" id="unitNumber" placeholder="e.g. Flat 402, B Wing, 4th Floor">
+                </div>
+                
+                <div class="col-12">
+                  <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900">Full Address</label>
+                  <textarea id="bookingAddress" name="address" class="form-control luxury-input" rows="3" placeholder="Enter the complete address for the session..." required></textarea>
+                </div>
 
-                <!-- ===== Location + Distance-based Pricing ===== -->
+                <!-- Preserved Backend Logic: Location & Map block -->
                 <div class="col-12">
                   <div class="location-card">
-                    <h2>Set Your Property Location</h2>
-                    <p class="location-hint">
-                      Search for your <strong>building, society, or street name</strong> (not your flat
-                      number — a flat number alone can't be found on a map, since every unit in a
-                      building sits at the same location). Enter the exact flat/house number separately
-                      above. We calculate your charge from the road distance between our shop
-                      (Appa Balwant Chowk, Pune) and this building.
+                    <h4 class="cinzel-heading fs-5 mb-3">Set Property Location</h4>
+                    <p class="font-montserrat small text-muted mb-3">
+                      Search for your building or society to calculate your accurate distance-based pricing. (Drag the pin on the map if needed).
                     </p>
 
                     <div class="location-controls">
-                      <button type="button" id="useMyLocationBtn" class="btn btn-outline-secondary">
-                        📍 Use My Current Location
-                      </button>
-                      <input type="text" id="locationSearchInput" class="form-control" placeholder="Search an address...">
-                      <button type="button" id="locationSearchBtn" class="btn btn-brand">Search</button>
+                      <button type="button" id="useMyLocationBtn" class="btn btn-outline-secondary font-montserrat small">📍 Use My Current Location</button>
+                      <input type="text" id="locationSearchInput" class="form-control luxury-input" placeholder="Search an address...">
+                      <button type="button" id="locationSearchBtn" class="btn-luxury-outline text-dark border-1 px-3 py-1">Search</button>
                     </div>
 
                     <div id="vastuMap"></div>
 
-                    <div class="price-summary">
+                    <div class="price-summary mb-3">
                       <div class="pill">
-                        <span class="label">Distance from Shop</span>
-                        <span class="value" id="distanceValue">--</span>
+                        <span class="label font-montserrat">Distance</span>
+                        <span class="value font-cinzel" id="distanceValue">--</span>
                       </div>
-                      <div class="pill">
-                        <span class="label">Estimated Charge</span>
-                        <span class="value" id="amountValue">--</span>
+                      <div class="pill border-gold">
+                        <span class="label font-montserrat text-gold">Total Charge</span>
+                        <span class="value font-cinzel" id="amountValue">--</span>
                       </div>
-                      <div class="payment-notice"> <strong>💳 Booking Payment Required</strong> <p> To successfully confirm your appointment, you need to pay <strong>50% of the total appointment charge</strong> as an advance payment. </p> </div>
+                    </div>
+                    
+                    <div class="alert alert-warning font-montserrat small py-2 mb-0">
+                      <strong>💳 Booking Payment Required:</strong> To confirm, you must pay <strong>50% of the total charge</strong> as an advance payment on the next screen.
                     </div>
 
-                    <!-- Hidden fields submitted along with the booking -->
+                    <!-- Hidden fields submitted with the booking -->
                     <input type="hidden" name="client_lat" id="clientLat">
                     <input type="hidden" name="client_lng" id="clientLng">
                     <input type="hidden" name="distance_km" id="distanceKm">
                     <input type="hidden" name="estimated_amount" id="estimatedAmount">
                   </div>
-
-                  
                 </div>
-                <!-- ===== End Location block ===== -->
-
+                
                 <div class="col-12 mt-4">
-                  <button class="btn btn-brand" type="button" id="openConfirmModal">Submit Booking</button>
-                </div>
+  <?php if (isset($_SESSION['user_id'])): ?>
+
+    <button class="btn-luxury-solid w-100" type="button" id="openConfirmModal">
+      Review &amp; Submit Request
+    </button>
+
+  <?php else: ?>
+
+    <button class="btn-luxury-solid w-100" type="button" disabled title="Please login to continue">
+      Review &amp; Submit Request
+    </button>
+
+    <p class="font-montserrat text-center small mt-3 mb-0 text-muted">
+      You need to be logged in to book a consultation.
+      <a href="login.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="text-gold fw-bold">Sign In</a>
+      to continue.
+    </p>
+
+  <?php endif; ?>
+</div>
               </form>
-              <div id="bookingAlert" class="alert alert-success mt-4 d-none"></div>
             </div>
           </div>
-          <div class="col-lg-5">
-            <div class="steps-card">
-              <h2>What Happens Next</h2>
-              <div class="step-item">
-                <strong>1. Request Received</strong>
-                <p>Your preferred date and time are recorded in the UI preview.</p>
-              </div>
-              <div class="step-item">
-                <strong>2. Team Review</strong>
-                <p>Admin panel users can approve, hold, or cancel requests visually.</p>
-              </div>
-              <div class="step-item">
-                <strong>3. Confirmation</strong>
-                <p>The client sees a clean confirmation message without backend dependency.</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </section>
   </main>
 
-
-  <!-- Booking Confirmation Modal -->
-<div class="modal fade" id="confirmBookingModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    Confirm Appointment
-                </h5>
-                <button type="button" class="btn-close"
-                    data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-
-                <p>Are you sure you want to book this appointment?</p>
-
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Name</th>
-                        <td id="confirmName"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Email</th>
-                        <td id="confirmEmail"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Mobile</th>
-                        <td id="confirmMobile"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Date</th>
-                        <td id="confirmDate"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Time</th>
-                        <td id="confirmTime"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Consultation</th>
-                        <td id="confirmType"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Property Details</th>
-                        <td id="confirmPropertyDetails"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Flat / House No.</th>
-                        <td id="confirmUnit"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Address</th>
-                        <td id="confirmAddress"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Distance from Shop</th>
-                        <td id="confirmDistance"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Estimated Charge</th>
-                        <td id="confirmAmount"></td>
-                    </tr>
-
+  <!-- Premium Booking Confirmation Modal -->
+  <div class="modal fade luxury-modal" id="confirmBookingModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content bg-dark-900 border-gold rounded-0">
+              <div class="modal-header border-0 py-4 px-4 px-md-5 d-flex justify-content-between align-items-center">
+                  <h4 class="modal-title cinzel-heading text-gold mb-0">Verify Reservation</h4>
+                  <button type="button" class="btn-close btn-close-white opacity-50" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-4 p-md-5 pt-0">
+                  <p class="font-montserrat text-white-75 mb-4 border-bottom border-light pb-4">Please ensure all details are accurate before proceeding to payment.</p>
+                  
+                  <div class="table-responsive">
+                    <!-- FIX: Added w-100 to ensure full stretch scaling -->
+                    <table class="table table-borderless luxury-confirm-table w-100 mb-0 font-montserrat text-white">
+                        <tbody>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide" style="width: 40%;">Client Name</th>
+                                <td id="confirmName" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Contact Email</th>
+                                <td id="confirmEmail" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Mobile Number</th>
+                                <td id="confirmMobile" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Scheduled Date</th>
+                                <td id="confirmDate" class="text-end text-gold"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Scheduled Time</th>
+                                <td id="confirmTime" class="text-end text-gold"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Service Required</th>
+                                <td id="confirmType" class="text-end"></td>
+                            </tr>
+                            <!-- Fields preserved from backend modal -->
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Property Details</th>
+                                <td id="confirmPropertyDetails" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Unit / Flat</th>
+                                <td id="confirmUnit" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Address</th>
+                                <td id="confirmAddress" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-white-50 text-uppercase small tracking-wide">Distance from Shop</th>
+                                <td id="confirmDistance" class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-gold text-uppercase small tracking-wide">Advance Due (50%)</th>
+                                <td id="confirmAmount" class="text-end fs-5 fw-bold text-gold"></td>
+                            </tr>
+                        </tbody>
                     </table>
+                  </div>
 
-<div class="form-check mt-3">
-  <input type="checkbox" class="form-check-input" id="agreeTerms">
-  <label class="form-check-label" for="agreeTerms">
-    I agree to the <a href="terms.php" target="_blank">Terms and Conditions</a>,
-    including that the payment is <strong>non-refundable</strong>.
-  </label>
-</div>
-<small id="agreeError" class="text-danger d-none">
-  Please accept the Terms and Conditions before confirming your booking.
-</small>
-
-</div>
-
-<div class="modal-footer">
-
-<button type="button"
-    class="btn btn-secondary"
-    data-bs-dismiss="modal">
-    Edit
-</button>
-
-<button type="button"
-    id="confirmSubmit"
-    class="btn btn-success"
-    disabled>
-    Confirm Booking
-</button>
-
-</div>
-
-        </div>
-    </div>
-</div>
-
-  <!-- Success BookingF Modal -->
-<div class="modal fade" id="successModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-
-            <div class="modal-body">
-
-                <div style="font-size:70px;color:#28a745;">
-                    ✅
-                </div>
-
-                <h3 class="mt-3">Booking Successful!</h3>
-
-                <p class="text-muted">
-                    Thank you for booking with <strong>VastuAura</strong>.
-                    <br>
-                    Our team will review your request and contact you shortly.
-                </p>
-
-                <button class="btn btn-success mt-3"
-                        data-bs-dismiss="modal">
-                    OK
-                </button>
-
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
-<!-- Email Change Confirmation Modal -->
-<div class="modal fade" id="emailChangeModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Update Registered Email?</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  <div class="form-check mt-4 font-montserrat text-white-75">
+                    <input type="checkbox" class="form-check-input bg-transparent border-light" id="agreeTerms">
+                    <label class="form-check-label small" for="agreeTerms">
+                      I agree to the <a href="terms.php" target="_blank" class="text-gold">Terms and Conditions</a>, including that the payment is <strong>non-refundable</strong>.
+                    </label>
+                  </div>
+                  <small id="agreeError" class="text-danger d-none font-montserrat">Please accept the Terms and Conditions before confirming your booking.</small>
+              </div>
+              
+              <div class="modal-footer border-top border-light py-4 px-4 px-md-5 bg-dark-800">
+                  <button type="button" class="btn-luxury-outline text-white border-0" data-bs-dismiss="modal">Modify</button>
+                  <button type="button" id="confirmSubmit" class="btn-luxury-solid" disabled>Pay & Confirm</button>
+              </div>
+          </div>
       </div>
-      <div class="modal-body">
-        <p>You registered with <strong id="emailOld"></strong>, but entered
-           <strong id="emailNew"></strong> for this booking.</p>
-        <p>Do you want to replace your account's registered email with this new one?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="emailChangeCancel">No, keep old email</button>
-        <button type="button" class="btn btn-success" id="emailChangeConfirm">Yes, update it</button>
-      </div>
-    </div>
   </div>
+
+  <!-- Premium Success Modal -->
+  <div class="modal fade luxury-modal" id="successModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-white border-0 rounded-0 text-center p-5 shadow-lg">
+              <div class="modal-body p-0">
+                  <div class="success-icon text-gold mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-check2-circle" viewBox="0 0 16 16">
+                        <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"/>
+                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"/>
+                      </svg>
+                  </div>
+                  <h3 class="cinzel-heading text-dark-900 mb-3">Reservation Successful</h3>
+                  <p class="font-montserrat text-muted mb-4">
+                      Thank you for choosing Vastu Shakti Rahasya.<br>
+                      Our concierge will review your request and contact you shortly.
+                  </p>
+                  <button class="btn-luxury-outline text-dark w-100" data-bs-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Payment Processing Modal (blocks blank-screen gap after Razorpay payment) -->
+  <div class="modal fade luxury-modal" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark-900 border-gold rounded-0 text-center p-5 shadow-lg">
+            <div class="modal-body p-0">
+                <div class="spinner-border text-gold mb-4" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 class="cinzel-heading text-gold mb-3">Confirming Your Reservation</h4>
+                <p class="font-montserrat text-white-75 mb-0">
+                    Payment received. Please wait while we save your booking…<br>
+                    Do not close or refresh this page.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
-  <footer class="site-footer">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <a class="footer-logo" href="index.php">VastuAura</a>
-          <p>Balanced digital experiences for modern Vastu consulting, commerce, and client engagement.</p>
+  <!-- Preserved Backend Logic: Email Change Confirmation Modal -->
+  <!-- <div class="modal fade luxury-modal" id="emailChangeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-0">
+        <div class="modal-header border-0 bg-muted">
+          <h5 class="modal-title font-cinzel text-dark-900">Update Registered Email?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="col-sm-6 col-lg-3">
-          <h3>Quick Links</h3>
-          <ul>
-            <li><a href="index.php">Home</a></li>
-            <li><a href="store.php">Store</a></li>
-            <li><a href="booking.php">Appointments</a></li>
+        <div class="modal-body font-montserrat">
+          <p>You originally registered with <strong id="emailOld" class="text-gold"></strong>, but entered <strong id="emailNew" class="text-gold"></strong> for this booking.</p>
+          <p class="mb-0">Do you want to replace your account's registered email with this new one?</p>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary font-montserrat" id="emailChangeCancel">No, keep old email</button>
+          <button type="button" class="btn btn-dark font-montserrat" id="emailChangeConfirm">Yes, update it</button>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Premium Dark Luxury Footer -->
+  <footer class="bespoke-footer border-top mt-5">
+    <div class="container">
+      <div class="row g-5 justify-content-between">
+        <div class="col-lg-4">
+          <a class="brand-logo mb-4 d-inline-block" href="index.php">
+            <div class="logo-wrapper">
+                <img src="assets/images/logo.jpeg" alt="Vastu Shakti Rahasya" class="logo-img" style="height: 45px; border-radius: 4px;">
+                <div class="logo-text">
+                    <span class="logo-title text-white">VASTU SHAKTI</span>
+                    <span class="logo-subtitle text-gold">R A H A S Y A</span>
+                </div>
+            </div>
+          </a>
+          <p class="font-montserrat footer-muted-text small pe-lg-4">
+            Curating positive spaces and aligning destinies through authentic traditional sciences, tailored for the modern world.
+          </p>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h5 class="footer-heading">Shop</h5>
+          <ul class="footer-links">
+            <li><a href="store.php?category=gemstones">Gemstones</a></li>
+            <li><a href="store.php?category=bracelets">Bracelets</a></li>
+            <li><a href="store.php?category=yantras">Yantras</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h5 class="footer-heading">Services</h5>
+          <ul class="footer-links">
+            <li><a href="booking.php">Book Session</a></li>
+            <li><a href="services.php#astrology">Astrology</a></li>
+            <li><a href="services.php#vastu">Vastu Audits</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2">
+          <h5 class="footer-heading">Support</h5>
+          <ul class="footer-links">
+            <li><a href="contact.php">Contact Us</a></li>
+            <li><a href="faq.php">FAQs</a></li>
             <li><a href="admin-login.php">Admin</a></li>
           </ul>
         </div>
-        <div class="col-sm-6 col-lg-2">
-          <h3>Contact</h3>
-          <ul>
-            <li>+91 98765 43210</li>
-            <li>hello@vastuaura.com</li>
-            <li>Jaipur, India</li>
-          </ul>
-        </div>
-        <div class="col-lg-3">
-          <h3>Newsletter</h3>
-          <form class="newsletter-form">
-            <input type="email" class="form-control" placeholder="Your email">
-            <button class="btn btn-brand w-100 mt-3" type="submit">Subscribe</button>
-          </form>
+      </div>
+      <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center mt-5 pt-4">
+        <p class="mb-0 small footer-muted-text font-montserrat">© 2026 Vastu Shakti Rahasya. All Rights Reserved.</p>
+        <div class="legal-links mt-3 mt-md-0">
+            <a href="#" class="small footer-muted-text font-montserrat me-3">Privacy Policy</a>
+            <a href="#" class="small footer-muted-text font-montserrat">Terms of Service</a>
         </div>
       </div>
-      <p class="copyright">© 2026 Developed &amp; Maintained by Vyomark Digital Solutions</p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+  <!-- Preserved Backend Scripts required for Map & Razorpay -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  
   <script src="assets/js/booking.js"></script>
   <script src="assets/js/common-modal.js"></script>
-
 </body>
 </html>

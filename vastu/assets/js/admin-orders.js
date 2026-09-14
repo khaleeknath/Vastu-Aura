@@ -115,6 +115,10 @@
     el.productFilter.dataset.populated = '1';
   }
 
+  // NOTE: every <td> below carries a data-label attribute. On desktop this
+  // is invisible, but on narrow screens (see admin-orders.css) the table
+  // switches to a stacked "card" layout and uses data-label as the row
+  // heading via CSS ::before, so each field is still identifiable on mobile.
   function renderTable(orders) {
     if (!orders || orders.length === 0) {
       el.tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">No orders found.</td></tr>`;
@@ -128,16 +132,16 @@
 
       return `
         <tr data-order-id="${order.id}">
-          <td>#${order.id}</td>
-          <td>
+          <td data-label="Order ID">#${order.id}</td>
+          <td data-label="Customer">
             <div class="fw-semibold">${escapeHtml(order.customer_name || 'N/A')}</div>
             <div class="text-muted small">${escapeHtml(order.email || '')}</div>
           </td>
-          <td>${escapeHtml(order.products || '—')}</td>
-          <td>${formatAmount(order.total_amount)}</td>
-          <td>${formatDate(order.order_date)}</td>
-          <td><span class="${statusBadgeClass(order.status)}">${escapeHtml(order.status)}</span></td>
-          <td>
+          <td data-label="Product">${escapeHtml(order.products || '—')}</td>
+          <td data-label="Amount">${formatAmount(order.total_amount)}</td>
+          <td data-label="Date">${formatDate(order.order_date)}</td>
+          <td data-label="Status"><span class="${statusBadgeClass(order.status)}">${escapeHtml(order.status)}</span></td>
+          <td data-label="Actions">
             <div class="d-flex gap-2 align-items-center">
               <select class="form-select form-select-sm order-status-select" data-order-id="${order.id}">
                 ${statusOptions}
@@ -310,5 +314,39 @@
   if (document.readyState !== 'loading') fetchOrders();
 
   hideMessage();
-})();
 
+  // --- Mobile off-canvas sidebar toggle ---
+  // Requires #sidebarToggle button and .sidebar-backdrop element (added to
+  // admin-orders.php) and an .admin-sidebar element (from admin-sidebar.php).
+  (function setupSidebarToggle() {
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.admin-sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!toggleBtn || !sidebar || !backdrop) return;
+
+    function openSidebar() {
+      sidebar.classList.add('show');
+      backdrop.classList.add('show');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('show');
+      backdrop.classList.remove('show');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (sidebar.classList.contains('show')) closeSidebar();
+      else openSidebar();
+    });
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Close the drawer automatically after a nav link is tapped
+    sidebar.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeSidebar);
+    });
+
+    // Keep things sane if the viewport is resized back up to desktop width
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 991.98) closeSidebar();
+    });
+  })();
+})();

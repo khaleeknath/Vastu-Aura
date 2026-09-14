@@ -62,6 +62,7 @@ while ($c = mysqli_fetch_assoc($catResult)) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/admin-appointments.css">
   <?php include 'common-modal.php'; ?>
+
 </head>
 <body>
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
@@ -322,7 +323,7 @@ while ($row = mysqli_fetch_assoc($result)) {
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger me-auto" id="modalDeleteBtn">Delete</button>
+          <!-- <button type="button" class="btn btn-danger me-auto" id="modalDeleteBtn">Delete</button> -->
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="button" id="modalUpdateBtn" class="btn btn-success">Save Changes</button>
         </div>

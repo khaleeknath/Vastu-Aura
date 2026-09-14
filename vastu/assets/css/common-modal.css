@@ -1,52 +1,86 @@
-.confirm-modal{
-    border:none;
-    border-radius:24px;
-    overflow:hidden;
-    background:var(--surface);
-    box-shadow:0 25px 60px rgba(0,0,0,.15);
+/* ==========================================================================
+   Vastu Shakti Rahasya - Premium Common Modal Styles
+   ========================================================================== */
+
+/* Core Modal Container */
+.luxury-modal .modal-content {
+  background-color: #10041d !important; /* Matches var(--clr-dark-900) */
+  border: 1px solid #d8b671 !important; /* Matches var(--clr-gold-main) */
+  border-radius: 4px !important;
 }
 
-.confirm-modal .modal-body{
-    padding:20px 40px 10px;
+/* Close Button Override for Dark Theme */
+.luxury-modal .modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+  transition: opacity 0.3s ease;
+}
+.luxury-modal .modal-header .btn-close:hover {
+  opacity: 1 !important;
 }
 
-.confirm-icon{
-
-    width:90px;
-    height:90px;
-
-    margin:auto;
-
-    border-radius:50%;
-
-    background:rgba(182,131,70,.12);
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:42px;
-
-    color:var(--brand-deep);
-
+/* Borders and Backgrounds */
+.luxury-modal .border-light {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.luxury-modal .bg-dark-800 {
+  background-color: #200a2d !important; /* Matches var(--clr-dark-800) */
 }
 
-#confirmModalTitle{
-
-    font-family:"Cormorant Garamond",serif;
-
-    font-size:2rem;
-
-    color:var(--brand-deep);
-
+/* Fallback Button Styles (Ensures buttons look premium even if page CSS is delayed) */
+.luxury-modal .btn-luxury-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-family: "Cinzel", serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.4s ease;
+  background-color: #d8b671;
+  color: #10041d;
+  border: 1px solid #d8b671;
+  cursor: pointer;
 }
 
-#confirmModalMessage{
+.luxury-modal .btn-luxury-solid:hover {
+  background-color: transparent;
+  color: #d8b671;
+  box-shadow: 0 0 20px rgba(216, 182, 113, 0.3);
+}
 
-    color:var(--muted);
+.luxury-modal .btn-luxury-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-family: "Cinzel", serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.4s ease;
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
 
-    margin-top:12px;
+.luxury-modal .btn-luxury-outline:hover {
+  color: #d8b671;
+}
 
-    line-height:1.7;
-
+/* Fallback Typography */
+.luxury-modal .cinzel-heading {
+  font-family: "Cinzel", serif;
+}
+.luxury-modal .font-montserrat {
+  font-family: "Montserrat", sans-serif;
+}
+.luxury-modal .text-gold {
+  color: #d8b671 !important;
+}
+.luxury-modal .text-white-75 {
+  color: rgba(255, 255, 255, 0.75) !important;
 }

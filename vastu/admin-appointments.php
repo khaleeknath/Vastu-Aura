@@ -203,5 +203,6 @@ while ($row = mysqli_fetch_assoc($result)) {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
   <script src="assets/js/admin-appointments.js"></script>
   <script src="assets/js/common-modal.js"></script>
+
 </body>
 </html>

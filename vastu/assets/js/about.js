@@ -1,34 +1,85 @@
-const aboutUser = JSON.parse(localStorage.getItem("vastuUser") || "null");
-const aboutAuthLink = document.querySelector("[data-nav-auth]");
-const aboutBackToTop = document.getElementById("backToTop");
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Sleek Navbar & Scroll Progress (Matched to Index System)
+  const navbar = document.getElementById("siteNavbar");
+  const progressBar = document.getElementById("scrollProgress");
 
-if (aboutUser && aboutAuthLink) {
-  aboutAuthLink.textContent = aboutUser.firstName;
-  aboutAuthLink.href = "booking.php";
-}
+  const handleScroll = () => {
+    // Navbar Shrink
+    if (navbar) {
+      if (window.scrollY > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    }
 
-window.addEventListener("scroll", () => {
-  aboutBackToTop.classList.toggle("show", window.scrollY > 280);
-});
+    // Scroll Progress Bar calculation
+    if (progressBar) {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      progressBar.style.width = scrolled + "%";
+    }
+  };
 
-aboutBackToTop?.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  handleScroll(); // Init on load
 
-document.querySelectorAll(".newsletter-form").forEach((form) => {
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    form.querySelector("button").textContent = "Subscribed";
+  // 2. High-End Intersection Observer Reveal Logic
+  const revealElements = document.querySelectorAll(".reveal-up");
+
+  const revealOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px",
+  };
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("active");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, revealOptions);
+
+  revealElements.forEach((el) => revealObserver.observe(el));
+
+  // 3. Auto-close mobile navbar on link click
+  const navLinks = document.querySelectorAll(
+    ".navbar-nav .nav-link:not(.dropdown-toggle)",
+  );
+  const navbarCollapse = document.getElementById("siteNav");
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (navbarCollapse && navbarCollapse.classList.contains("show")) {
+        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) bsCollapse.hide();
+      }
+    });
+  });
+
+  // 4. Newsletter Submission Simulator (Preserved Functionality)
+  const newsletterForms = document.querySelectorAll(".newsletter-form");
+  newsletterForms.forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const btn = form.querySelector("button");
+      const originalText = btn.textContent;
+
+      btn.textContent = "Subscribed ✓";
+      btn.style.backgroundColor = "var(--clr-purple-main)";
+      btn.style.color = "var(--clr-white)";
+
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
+        form.reset();
+      }, 3000);
+    });
   });
 });
-
-if (window.anime) {
-  anime({
-    targets: ".hero-shell .eyebrow, .hero-shell h1, .hero-shell p, .portrait-panel, .story-card, .timeline-item, .value-card",
-    translateY: [28, 0],
-    opacity: [0, 1],
-    delay: anime.stagger(80),
-    duration: 850,
-    easing: "easeOutQuad"
-  });
-}

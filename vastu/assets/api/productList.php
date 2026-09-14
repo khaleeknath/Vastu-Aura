@@ -62,6 +62,9 @@ if (isset($_SESSION['user_id'])) {
     $cartResult = $cartStmt->get_result()->fetch_assoc();
 
     $cartCount = $cartResult['totalQty'] ?? 0;
+
+    $_SESSION['cart_count'] = $cartCount;
+
 }
 
 echo json_encode([

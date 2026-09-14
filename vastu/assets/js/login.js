@@ -1,17 +1,31 @@
+document.addEventListener("DOMContentLoaded", () => {
+  // Password Toggle Functionality (Preserved Backend Selector & Classes)
+  const passwordInput = document.getElementById("password");
+  const togglePasswordBtn = document.getElementById("togglePassword");
 
-const password = document.getElementById("password");
-const togglePassword = document.getElementById("togglePassword");
-const icon = togglePassword.querySelector("i");
-togglePassword.addEventListener("click", () => {
+  if (passwordInput && togglePasswordBtn) {
+    const icon = togglePasswordBtn.querySelector("i");
 
-  if (password.type === "password") {
-      password.type = "text";
-      icon.classList.remove("bi-eye-fill");
-      icon.classList.add("bi-eye-slash-fill");
-  } else {
-      password.type = "password";
-      icon.classList.remove("bi-eye-slash-fill");
-      icon.classList.add("bi-eye-fill");
+    togglePasswordBtn.addEventListener("click", () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("bi-eye-fill");
+        icon.classList.add("bi-eye-slash-fill");
+        icon.classList.add("text-gold");
+      } else {
+        passwordInput.type = "password";
+        icon.classList.remove("bi-eye-slash-fill");
+        icon.classList.add("bi-eye-fill");
+        icon.classList.remove("text-gold");
+      }
+    });
   }
 
+  // Trigger Entrance Animation
+  setTimeout(() => {
+    const card = document.querySelector(".luxury-auth-card");
+    if (card) {
+      card.classList.add("active");
+    }
+  }, 100);
 });

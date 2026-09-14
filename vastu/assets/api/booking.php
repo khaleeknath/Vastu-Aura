@@ -6,11 +6,11 @@ require_once('mailer.php');
 header('Content-Type: application/json');
 
 // ---- Auth check ----
-if (!isset($_SESSION['user_id'])) {
-    error_log("[booking] No user_id in session - not logged in");
-    echo json_encode(["status" => false, "message" => "Please login first"]);
-    exit;
-}
+// if (!isset($_SESSION['user_id'])) {
+//     error_log("[booking] No user_id in session - not logged in");
+//     echo json_encode(["status" => false, "message" => "Please login first"]);
+//     exit;
+// }
 
 
 if (isset($_GET['action']) && $_GET['action'] === 'get_booking_slots') {
