@@ -3,7 +3,7 @@
 // pagination, and inline order status updates.
 
 (function () {
-  const BACKEND_URL = 'assets/api/admin-orders.php';
+  const  BACKEND_URL = 'assets/api/admin-orders.php';
 
   const el = {
     tableBody: document.getElementById('ordersTableBody'),
@@ -92,7 +92,7 @@
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Failed to load orders.');
       }
-
+      console.log("respomnse >>>", data.orders)
       renderTable(data.orders);
       renderPagination(data.pagination);
       renderResultInfo(data.pagination);
@@ -138,12 +138,14 @@
             <div class="text-muted small">${escapeHtml(order.email || '')}</div>
           </td>
           <td data-label="Product">${escapeHtml(order.products || '—')}</td>
+           <td data-label="Quantity">${escapeHtml(order.quantity || '—')}</td>
+           <td data-label="paymentMethod">${escapeHtml(order.payment_method || '—')}</td>
           <td data-label="Amount">${formatAmount(order.total_amount)}</td>
           <td data-label="Date">${formatDate(order.order_date)}</td>
           <td data-label="Status"><span class="${statusBadgeClass(order.status)}">${escapeHtml(order.status)}</span></td>
           <td data-label="Actions">
             <div class="d-flex gap-2 align-items-center">
-              <select class="form-select form-select-sm order-status-select" data-order-id="${order.id}">
+              <select class="form-select form-select-sm order-status-select" data-order-id="${order.id}"  data-payment-method="${escapeHtml(order.payment_method || '')}">
                 ${statusOptions}
               </select>
               <button class="btn btn-sm btn-brand order-status-save" data-order-id="${order.id}">Update</button>
@@ -213,7 +215,8 @@
       .replace(/"/g, '&quot;');
   }
 
-  async function updateOrderStatus(orderId, newStatus, triggerBtn) {
+  async function updateOrderStatus(orderId, newStatus, paymentMethod, triggerBtn) {
+    console.log(">>>payenyMethod >>", paymentMethod)
     const originalLabel = triggerBtn.textContent;
     triggerBtn.disabled = true;
     triggerBtn.textContent = 'Saving…';
@@ -224,7 +227,7 @@
           'Content-Type': 'application/x-www-form-urlencoded',
           'X-Requested-With': 'XMLHttpRequest',
         },
-        body: new URLSearchParams({ action: 'update_status', order_id: orderId, status: newStatus }),
+        body: new URLSearchParams({ action: 'update_status', order_id: orderId, status: newStatus, payment : paymentMethod }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -247,7 +250,9 @@
     if (!btn) return;
     const orderId = btn.dataset.orderId;
     const select = el.tableBody.querySelector(`.order-status-select[data-order-id="${orderId}"]`);
-    updateOrderStatus(orderId, select.value, btn);
+    const paymentMethod = select.dataset.paymentMethod;
+
+    updateOrderStatus(orderId, select.value,paymentMethod, btn);
   });
 
   el.statusFilter.addEventListener('change', () => {

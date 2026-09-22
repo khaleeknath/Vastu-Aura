@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login | VastuAura</title>
+  <title>Admin Login | Vastu Shakti Rahasya</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
   <main class="admin-auth-shell">
     <div class="admin-auth-card">
-      <a class="logo-mark" href="index.php">VastuAura</a>
+      <a class="logo-mark" href="index.php">Vastu Shakti Rahasya</a>
       <span class="eyebrow">Admin Access</span>
       <h1>Sign in to manage orders, appointments, and admin accounts.</h1>
       <form id="adminLoginForm" class="row g-3" action="assets/api/login.php" method="POST">
@@ -25,7 +25,7 @@
         </div>
         <!-- <div class="col-12">
           <label class="form-label">Email</label>
-          <input id="adminEmail" type="email" class="form-control" value="admin@vastuaura.com" required>
+          <input id="adminEmail" type="email" class="form-control" value="admin@Vastu Shakti Rahasya.com" required>
         </div> -->
         <div class="col-12">
           <label class="form-label">Password</label>

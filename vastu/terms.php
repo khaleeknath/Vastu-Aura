@@ -119,7 +119,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <div class="col-lg-8 font-montserrat reveal-up stagger-1">
             
             <div class="notice mb-5">
-              By checking "I agree to the Terms and Conditions" and completing payment for a booking on VastuAura,
+              By checking "I agree to the Terms and Conditions" and completing payment for a booking on Vastu Shakti Rahasya,
               you confirm that you have read, understood, and accepted the terms below — in particular, that the
               <strong>consultation payment is non-refundable</strong>.
             </div>
@@ -155,7 +155,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <ol>
               <li>Distance-based pricing is calculated using the location pin, search result, or current location set by the client on the map at the time of booking.</li>
               <li>Clients are responsible for accurately placing the map pin on their building/society and providing the correct flat, house number, and address details separately.</li>
-              <li>VastuAura is not liable for pricing discrepancies arising from an incorrectly placed pin or inaccurate address information provided by the client.</li>
+              <li>Vastu Shakti Rahasya is not liable for pricing discrepancies arising from an incorrectly placed pin or inaccurate address information provided by the client.</li>
             </ol>
 
             <h2 class="cinzel-heading">6. Nature of Consultation</h2>
@@ -165,7 +165,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
               <li>Any structural, financial, or personal decisions made based on the consultation are the sole responsibility of the client.</li>
             </ol>
 
-            <h2 class="cinzel-heading">7. Cancellation by VastuAura</h2>
+            <h2 class="cinzel-heading">7. Cancellation by Vastu Shakti Rahasya</h2>
             <ol>
               <li>If a confirmed consultation is cancelled from our end due to unavoidable circumstances, the client will be offered either a rescheduled slot or a full refund, at our discretion.</li>
             </ol>
@@ -177,12 +177,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
             <h2 class="cinzel-heading">9. Changes to These Terms</h2>
             <ol>
-              <li>VastuAura reserves the right to update these Terms and Conditions at any time without prior notice. Continued use of the booking service constitutes acceptance of the updated terms.</li>
+              <li>Vastu Shakti Rahasya reserves the right to update these Terms and Conditions at any time without prior notice. Continued use of the booking service constitutes acceptance of the updated terms.</li>
             </ol>
 
             <h2 class="cinzel-heading">10. Contact</h2>
             <ol>
-              <li>For questions regarding these terms, rescheduling, or booking issues, please reach us at <strong>hello@vastuaura.com</strong> or <strong>+91 98765 43210</strong>.</li>
+              <li>For questions regarding these terms, rescheduling, or booking issues, please reach us at <strong>hello@Vastu Shakti Rahasya.com</strong> or <strong>+91 98765 43210</strong>.</li>
             </ol>
 
             <div class="mt-5 pt-4">

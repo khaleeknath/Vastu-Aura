@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Management | VastuAura</title>
+  <title>Admin Management | Vastu Shakti Rahasya</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
   <div class="admin-layout">
     <aside class="admin-sidebar">
-      <a class="logo-mark" href="index.php">VastuAura</a>
+      <a class="logo-mark" href="index.php">Vastu Shakti Rahasya</a>
       <nav>
         <a href="admin-orders.php">Orders</a>
         <a href="admin-appointments.php">Appointments</a>
@@ -27,7 +27,7 @@
       <header class="admin-topbar">
         <div class="hello-box">Hello <span id="adminGreeting">Admin Anaya</span></div>
         <div class="topbar-actions">
-          <a class="logo-mark small" href="index.php">VastuAura</a>
+          <a class="logo-mark small" href="index.php">Vastu Shakti Rahasya</a>
           <button id="topbarLogout" class="btn btn-outline-brand" type="button">Logout</button>
         </div>
       </header>

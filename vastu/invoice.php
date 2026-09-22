@@ -19,7 +19,7 @@ $phone = $_SESSION['phone'] ?? '';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice | VastuAura</title>
+  <title>Invoice | Vastu Shakti Rahasya</title>
 
   <!-- Premium Typography — same as store page -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -227,7 +227,7 @@ $phone = $_SESSION['phone'] ?? '';
     <div class="container">
       <div class="row g-5 justify-content-between">
         <div class="col-lg-4">
-          <a class="footer-brand-name" href="index.php">VastuAura</a>
+          <a class="footer-brand-name" href="index.php">Vastu Shakti Rahasya</a>
           <p class="footer-muted-text font-montserrat small pe-lg-4">
             Balanced digital experiences for modern Vastu consulting, commerce, and client engagement.
           </p>
@@ -247,7 +247,7 @@ $phone = $_SESSION['phone'] ?? '';
           <h5 class="footer-heading">Contact</h5>
           <ul class="footer-links">
             <li>+91 98765 43210</li>
-            <li>hello@vastuaura.com</li>
+            <li>hello@Vastu Shakti Rahasya.com</li>
             <li>Jaipur, India</li>
           </ul>
         </div>

@@ -57,7 +57,7 @@ function sendBookingConfirmationEmail(array $booking): bool
 
     try {
         $mail->addAddress($booking['email'], $booking['name']);
-        $mail->Subject = "Your VastuAura appointment is confirmed";
+        $mail->Subject = "Your Vastu Shakti Rahasya appointment is confirmed";
 
         $mail->Body = buildCustomerEmailHtml($booking);
         $mail->AltBody = buildCustomerEmailPlainText($booking);
@@ -106,7 +106,7 @@ function buildCustomerEmailHtml(array $b): string
     <div style='font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #2c2620;'>
         <h2 style='color:#8a6d3b;'>Your appointment is confirmed!</h2>
         <p>Hi " . e($b['name']) . ",</p>
-        <p>Thank you for booking with <strong>VastuAura</strong>. Here are your appointment details:</p>
+        <p>Thank you for booking with <strong>Vastu Shakti Rahasya</strong>. Here are your appointment details:</p>
         <table style='width:100%; border-collapse: collapse;'>
             <tr><td style='padding:6px 0; color:#7a7368;'>Date</td><td style='padding:6px 0;'><strong>" . e($b['preferred_date']) . "</strong></td></tr>
             <tr><td style='padding:6px 0; color:#7a7368;'>Time</td><td style='padding:6px 0;'><strong>" . e($b['preferred_time']) . "</strong></td></tr>
@@ -142,7 +142,7 @@ function buildAdminEmailHtml(array $b): string
 
 function buildCustomerEmailPlainText(array $b): string
 {
-    return "Your VastuAura appointment is confirmed.\n\n"
+    return "Your Vastu Shakti Rahasya appointment is confirmed.\n\n"
         . "Date: {$b['preferred_date']}\n"
         . "Time: {$b['preferred_time']}\n"
         . "Consultation Type: {$b['consultation_type']}\n"
@@ -169,7 +169,7 @@ function sendOrderConfirmationEmail(array $order): bool
     try {
         $mail->addAddress($order['email'], $order['name']);
 
-        $mail->Subject = "Your VastuAura Order #{$order['order_id']} is Confirmed";
+        $mail->Subject = "Your Vastu Shakti Rahasya Order #{$order['order_id']} is Confirmed";
 
         $mail->Body = buildOrderConfirmationEmailHtml($order);
          $mail->AltBody = buildOrderConfirmationEmailPlainText($order);
@@ -227,7 +227,7 @@ function buildOrderConfirmationEmailHtml(array $o): string
     <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; color:#333;">
 
         <div style="background:#8a6d3b; padding:24px; text-align:center;">
-            <h1 style="color:#fff; margin:0; font-size:22px;">VastuAura</h1>
+            <h1 style="color:#fff; margin:0; font-size:22px;">Vastu Shakti Rahasya</h1>
             <p style="color:#f0e6d6; margin:6px 0 0;">Order Confirmed</p>
         </div>
 
@@ -264,7 +264,7 @@ function buildOrderConfirmationEmailHtml(array $o): string
             </table>
 
             <p style="margin-top:24px;">We hope to see you again soon.</p>
-            <p style="color:#8a6d3b; font-weight:bold;">— Team VastuAura</p>
+            <p style="color:#8a6d3b; font-weight:bold;">— Team Vastu Shakti Rahasya</p>
         </div>
 
     </div>';
@@ -276,7 +276,7 @@ function buildOrderConfirmationEmailPlainText(array $o): string
     $subDivider = str_repeat("-", 40) . "\n";
 
     $text  = $divider;
-    $text .= "        VASTUAURA - ORDER CONFIRMED\n";
+    $text .= "        Vastu Shakti Rahasya - ORDER CONFIRMED\n";
     $text .= $divider . "\n";
 
     $text .= "Order ID       : #" . $o['order_id'] . "\n";
@@ -313,7 +313,7 @@ function buildOrderConfirmationEmailPlainText(array $o): string
         . number_format((float)$o['grand_total'], 2) . "\n";
 
     $text .= "\n" . $divider;
-    $text .= "Thank you for shopping with VastuAura!\n";
+    $text .= "Thank you for shopping with Vastu Shakti Rahasya!\n";
     $text .= "We hope to see you again soon.\n";
     $text .= $divider;
 
@@ -337,7 +337,7 @@ function sendBookingStatusUpdateEmail(array $booking): bool
 
     try {
         $mail->addAddress($booking['email'], $booking['name']);
-        $mail->Subject = "Update on your VastuAura appointment - " . ucfirst($booking['status']);
+        $mail->Subject = "Update on your Vastu Shakti Rahasya appointment - " . ucfirst($booking['status']);
 
         $mail->Body    = buildStatusUpdateEmailHtml($booking);
         $mail->AltBody = buildStatusUpdateEmailPlainText($booking);
@@ -372,7 +372,7 @@ function buildStatusUpdateEmailHtml(array $b): string
     <div style='font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #2c2620;'>
         <h2 style='color:#8a6d3b;'>Appointment Update</h2>
         <p>Hi " . e($b['name']) . ",</p>
-        <p>The status of your appointment with <strong>VastuAura</strong> has been updated to:</p>
+        <p>The status of your appointment with <strong>Vastu Shakti Rahasya</strong> has been updated to:</p>
         <p style='margin:16px 0;'>
             <span style='display:inline-block; padding:6px 14px; border-radius:20px; background:" . $color . "; color:#fff; font-weight:600; text-transform:capitalize;'>" . e($status) . "</span>
         </p>
@@ -382,7 +382,7 @@ function buildStatusUpdateEmailHtml(array $b): string
         </table>
         " . ($comment !== '' ? "<p style='margin-top:20px;'><strong>Note from our team:</strong><br>" . nl2br(e($comment)) . "</p>" : "") . "
         <p style='margin-top:24px;'>If you have any questions, just reply to this email.</p>
-        <p style='color:#7a7368; font-size:.85rem;'>— The VastuAura Team</p>
+        <p style='color:#7a7368; font-size:.85rem;'>— The Vastu Shakti Rahasya Team</p>
     </div>";
 }
 
@@ -391,7 +391,7 @@ function buildStatusUpdateEmailPlainText(array $b): string
     $status  = $b['status'] ?? 'pending';
     $comment = trim($b['comment'] ?? '');
 
-    $text = "Your VastuAura appointment status has been updated to: " . ucfirst($status) . "\n\n";
+    $text = "Your Vastu Shakti Rahasya appointment status has been updated to: " . ucfirst($status) . "\n\n";
     if (!empty($b['preferred_date'])) $text .= "Date: {$b['preferred_date']}\n";
     if (!empty($b['preferred_time'])) $text .= "Time: {$b['preferred_time']}\n";
     if ($comment !== '') $text .= "\nNote from our team: {$comment}\n";
@@ -400,4 +400,50 @@ function buildStatusUpdateEmailPlainText(array $b): string
 }
 
 
-
+function sendPasswordResetOtpEmail(array $data): bool
+{
+    $mail = getConfiguredMailer();
+    if ($mail === null) return false;
+ 
+    try {
+        $mail->addAddress($data['email'], $data['name'] ?? '');
+        $mail->Subject = "Your Vastu Shakti Rahasya password reset code";
+ 
+        $mail->Body    = buildPasswordResetOtpEmailHtml($data);
+        $mail->AltBody = buildPasswordResetOtpEmailPlainText($data);
+ 
+        $mail->send();
+        error_log("[mailer] Password reset OTP sent to " . $data['email']);
+        return true;
+    } catch (PHPMailerException $e) {
+        error_log("[mailer] Failed to send password reset OTP: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+ 
+function buildPasswordResetOtpEmailHtml(array $d): string
+{
+    $name = e($d['name'] ?? 'there');
+    $otp  = e($d['otp']);
+ 
+    return "
+    <div style='font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #2c2620;'>
+        <h2 style='color:#8a6d3b;'>Reset your password</h2>
+        <p>Hi " . $name . ",</p>
+        <p>We received a request to reset your Vastu Shakti Rahasya account password. Use the code below to continue:</p>
+        <div style='margin:24px 0; text-align:center;'>
+            <span style='display:inline-block; padding:14px 28px; font-size:28px; letter-spacing:6px; font-weight:700; background:#f7f3ec; color:#8a6d3b; border-radius:8px;'>" . $otp . "</span>
+        </div>
+        <p>If you didn't request a password reset, you can safely ignore this email.</p>
+        <p style='color:#7a7368; font-size:.85rem;'>For your security, never share this code with anyone — our team will never ask you for it.</p>
+    </div>";
+}
+ 
+function buildPasswordResetOtpEmailPlainText(array $d): string
+{
+    $name = $d['name'] ?? 'there';
+    return "Hi " . $name . ",\n\n"
+        . "We received a request to reset your Vastu Shakti Rahasya account password.\n\n"
+        . "Your code: " . $d['otp'] . "\n\n"
+        . "If you didn't request this, you can safely ignore this email.\n";
+}

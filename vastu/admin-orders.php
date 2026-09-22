@@ -16,7 +16,7 @@ $adminName = $_SESSION['name'] ?? 'Admin';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Orders | VastuAura</title>
+  <title>Admin Orders | Vastu Shakti Rahasya</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -110,13 +110,15 @@ $adminName = $_SESSION['name'] ?? 'Admin';
                   <th>Order ID</th>
                   <th>Customer</th>
                   <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Payment Method</th>
                   <th>Amount</th>
                   <th>Date</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="ordersTableBody"></tbody>
+              <tbody id="ordersTableBody"></tbody> 
             </table>
           </div>
 

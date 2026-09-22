@@ -141,6 +141,8 @@ function handleList(mysqli $conn, array $allowedStatuses): void
             o.total_amount,
             o.status,
             o.order_date,
+            oi.quantity,
+            py.payment_method,
             CONCAT(u.first_name, ' ', COALESCE(u.last_name, '')) AS customer_name,
             u.email,
             GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS products
@@ -148,6 +150,7 @@ function handleList(mysqli $conn, array $allowedStatuses): void
         JOIN tbl_users u ON u.id = o.user_id
         LEFT JOIN tbl_order_items oi ON oi.order_id = o.id
         LEFT JOIN tbl_products p ON p.id = oi.product_id
+        LEFT JOIN tbl_payments py ON py.order_id = o.id
         WHERE $whereSql
         GROUP BY o.id
         ORDER BY o.order_date DESC
@@ -187,6 +190,7 @@ function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
 {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $newStatus = trim($_POST['status'] ?? '');
+    $paymentMethod = trim($_POST['payment'] ?? '');
 
     // -----------------------------------------
     // Validate order ID
@@ -303,7 +307,8 @@ function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
     // Determine whether stock needs deduction
     // -----------------------------------------
     $needsStockDeduction =
-        ($newStatus === 'Dispatched' && $currentStatus !== 'Dispatched');
+    ($newStatus === 'Dispatched' && $currentStatus !== 'Dispatched')
+    && strcasecmp($paymentMethod, 'Cash on Delivery') === 0;
 
     error_log(
         "[order-status] Stock deduction required: "
@@ -414,54 +419,54 @@ function handleUpdateStatus(mysqli $conn, array $allowedStatuses): void
                 // -----------------------------------------
                 // Update product stock
                 // -----------------------------------------
-                $stockStmt = $conn->prepare("
-                    UPDATE tbl_products
-                    SET stock = stock - ?
-                    WHERE id = ?
-                      AND stock >= ?
-                ");
+                // $stockStmt = $conn->prepare("
+                //     UPDATE tbl_products
+                //     SET stock = stock - ?
+                //     WHERE id = ?
+                //       AND stock >= ?
+                // ");
 
-                if ($stockStmt === false) {
-                    throw new Exception(
-                        "Failed to prepare stock update: "
-                        . $conn->error
-                    );
-                }
+                // if ($stockStmt === false) {
+                //     throw new Exception(
+                //         "Failed to prepare stock update: "
+                //         . $conn->error
+                //     );
+                // }
 
-                $stockStmt->bind_param(
-                    'iii',
-                    $quantity,
-                    $productId,
-                    $quantity
-                );
+                // $stockStmt->bind_param(
+                //     'iii',
+                //     $quantity,
+                //     $productId,
+                //     $quantity
+                // );
 
-                if (!$stockStmt->execute()) {
+                // if (!$stockStmt->execute()) {
 
-                    $error = $stockStmt->error;
+                //     $error = $stockStmt->error;
 
-                    $stockStmt->close();
+                //     $stockStmt->close();
 
-                    throw new Exception(
-                        "Failed to update stock for product #"
-                        . $productId
-                        . ": "
-                        . $error
-                    );
-                }
+                //     throw new Exception(
+                //         "Failed to update stock for product #"
+                //         . $productId
+                //         . ": "
+                //         . $error
+                //     );
+                // }
 
-                // Make sure stock was actually updated
-                if ($stockStmt->affected_rows === 0) {
+                // // Make sure stock was actually updated
+                // if ($stockStmt->affected_rows === 0) {
 
-                    $stockStmt->close();
+                //     $stockStmt->close();
 
-                    throw new Exception(
-                        "Stock update failed for product #"
-                        . $productId
-                        . ". Insufficient stock."
-                    );
-                }
+                //     throw new Exception(
+                //         "Stock update failed for product #"
+                //         . $productId
+                //         . ". Insufficient stock."
+                //     );
+                // }
 
-                $stockStmt->close();
+                // $stockStmt->close();
 
                 // -----------------------------------------
                 // Record stock movement

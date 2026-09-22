@@ -6,7 +6,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <aside class="admin-sidebar">
 
     <a class="logo-mark" href="index.php">
-        VastuAura
+        Vastu Shakti Rahasya
     </a>
 
     <nav>

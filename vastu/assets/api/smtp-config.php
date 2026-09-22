@@ -31,7 +31,7 @@ define('SMTP_PASSWORD', 'qmel gzcw yizh mhqr');
 
 // What shows up as the "From" name/address on emails sent to customers
 define('MAIL_FROM_EMAIL', 'khaleeknath@gmail.com'); // usually same as SMTP_USERNAME
-define('MAIL_FROM_NAME', 'VastuAura');
+define('MAIL_FROM_NAME', 'Vastu Shakti Rahasya');
 
 // Where booking notifications should be sent to YOU (the business owner)
 define('ADMIN_NOTIFICATION_EMAIL', 'khaleeknath@gmail.com');

@@ -92,7 +92,7 @@ function generatePDF(print = false) {
 
   const options = {
     margin: 10,
-    filename: "VastuAura-Invoice.pdf",
+    filename: "Vastu Shakti Rahasya-Invoice.pdf",
     image: { type: "jpeg", quality: 1 },
     html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -109,7 +109,7 @@ function generatePDF(print = false) {
         const url = URL.createObjectURL(blob);
         window.open(url);
       } else {
-        pdf.save("VastuAura-Invoice.pdf");
+        pdf.save("Vastu Shakti Rahasya-Invoice.pdf");
       }
     });
 }

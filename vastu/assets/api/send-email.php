@@ -19,7 +19,7 @@ function sendStatusEmail($to, $name, $status, $comment) {
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom('yourgmail@gmail.com', 'VastuAura');
+        $mail->setFrom('yourgmail@gmail.com', 'Vastu Shakti Rahasya');
         $mail->addAddress($to, $name);
 
         $mail->isHTML(true);
@@ -31,7 +31,7 @@ function sendStatusEmail($to, $name, $status, $comment) {
             <p><b>Status:</b> $status</p>
             <p><b>Comment:</b> $comment</p>
             <br>
-            <p>Thanks,<br>VastuAura Team</p>
+            <p>Thanks,<br>Vastu Shakti Rahasya Team</p>
         ";
 
         $mail->send();

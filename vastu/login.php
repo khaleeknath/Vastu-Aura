@@ -104,7 +104,7 @@ session_start();
             <div class="col-12">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <label class="form-label text-uppercase tracking-wide small fw-bold text-dark-900 mb-0">Password</label>
-                <!-- <a href="forgot-password.html" class="text-gold text-decoration-none small fw-medium">Forgot?</a> -->
+                <a href="forgot-password.php" class="text-gold text-decoration-none small fw-medium">Forgot?</a>
               </div>
               <div class="input-group luxury-input-group">
                 <input type="password" id="password" name="password" class="form-control luxury-input border-end-0" placeholder="Enter password" required>

@@ -457,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// 9. VastuAura Leaflet Map Location + Distance-based Pricing
+// 9. Vastu Shakti Rahasya Leaflet Map Location + Distance-based Pricing
 (function () {
   "use strict";
 

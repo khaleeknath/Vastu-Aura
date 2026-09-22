@@ -1,10 +1,10 @@
 const defaultAdmins = [
-  { name: "Admin Anaya", email: "admin@vastuaura.com", role: "Operations Admin" },
-  { name: "Rahul Sethi", email: "rahul@vastuaura.com", role: "Store Admin" },
-  { name: "Nisha Rao", email: "nisha@vastuaura.com", role: "Support Admin" }
+  { name: "Admin Anaya", email: "admin@Vastu Shakti Rahasya.com", role: "Operations Admin" },
+  { name: "Rahul Sethi", email: "rahul@Vastu Shakti Rahasya.com", role: "Store Admin" },
+  { name: "Nisha Rao", email: "nisha@Vastu Shakti Rahasya.com", role: "Support Admin" }
 ];
 
-const adminsInfo = JSON.parse(localStorage.getItem("vastuAdmin") || '{"name":"Admin Anaya","email":"admin@vastuaura.com"}');
+const adminsInfo = JSON.parse(localStorage.getItem("vastuAdmin") || '{"name":"Admin Anaya","email":"admin@Vastu Shakti Rahasya.com"}');
 document.getElementById("adminGreeting").textContent = adminsInfo.name;
 const adminAdminsBackToTop = document.getElementById("backToTop");
 
