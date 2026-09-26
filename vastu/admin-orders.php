@@ -1,11 +1,11 @@
 <?php
 // admin-orders.php
 // Guards the page with an admin session check. Adjust the session key
-// names below to match whatever your login script (admin-login.php) sets.
+// names below to match whatever your login script (login.php) sets.
 session_start();
 
 if (empty($_SESSION['user_id'])) {
-    header('Location: admin-login.php');
+    header('Location: login.php');
     exit;
 }
 

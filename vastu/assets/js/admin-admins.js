@@ -64,7 +64,7 @@ adminsTableBody?.addEventListener("click", (event) => {
 
 const logoutAdminsPanel = () => {
   localStorage.removeItem("vastuAdmin");
-  window.location.href = "admin-login.php";
+  window.location.href = "login.php";
 };
 
 document.getElementById("sidebarLogout")?.addEventListener("click", (event) => {

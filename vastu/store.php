@@ -219,7 +219,7 @@ $cartCount = $_SESSION['cart_count'] ?? 0;
           <ul class="footer-links">
             <li><a href="contact.php">Contact Us</a></li>
             <li><a href="faq.php">FAQs</a></li>
-            <li><a href="admin-login.php">Admin</a></li>
+            <li><a href="login.php">Admin</a></li>
           </ul>
         </div>
       </div>

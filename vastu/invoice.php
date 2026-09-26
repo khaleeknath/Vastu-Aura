@@ -239,7 +239,7 @@ $phone = $_SESSION['phone'] ?? '';
             <li><a href="index.php">Home</a></li>
             <li><a href="store.php">Store</a></li>
             <li><a href="booking.php">Appointments</a></li>
-            <li><a href="admin-login.php">Admin</a></li>
+            <li><a href="login.php">Admin</a></li>
           </ul>
         </div>
 

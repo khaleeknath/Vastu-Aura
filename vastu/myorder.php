@@ -224,7 +224,7 @@ if (!isset($_SESSION['user_id'])) {
           <ul class="footer-links">
             <li><a href="contact.php">Contact Us</a></li>
             <li><a href="faq.php">FAQs</a></li>
-            <li><a href="admin-login.php">Admin</a></li>
+            <li><a href="login.php">Admin</a></li>
           </ul>
         </div>
       </div>
