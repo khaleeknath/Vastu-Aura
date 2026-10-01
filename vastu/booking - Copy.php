@@ -138,7 +138,7 @@ $phone = $_SESSION['phone'] ?? '';
       <div class="collapse navbar-collapse" id="siteNav">
         <ul class="navbar-nav mx-auto nav-links-premium">
           <li class="nav-item">
-            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">The Atelier</a>
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">HOME</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>

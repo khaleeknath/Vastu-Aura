@@ -51,12 +51,22 @@ curl_setopt_array($ch, [
 ]);
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
 curl_close($ch);
 
 $order = json_decode($response, true);
 
 if ($httpCode !== 200 || empty($order['id'])) {
-    echo json_encode(['status' => false, 'message' => 'Could not create payment order.']);
+    // TEMP DEBUG — remove once fixed
+    error_log("Razorpay order failed | HTTP: $httpCode | cURL error: $curlError | Response: $response");
+    echo json_encode([
+        'status'  => false,
+        'message' => 'Could not create payment order.',
+        'debug'   => [
+            'http_code' => $httpCode,
+            'response'  => $order ?: $response,
+        ],
+    ]);
     exit;
 }
 

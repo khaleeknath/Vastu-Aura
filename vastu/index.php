@@ -61,7 +61,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- 2. Navigation Links (Right of Logo, pushes remaining items to Extreme Right) -->
         <ul class="navbar-nav align-items-xl-center nav-links-premium ms-xl-4 mt-4 mt-xl-0 pb-3 pb-xl-0 me-auto">
           <li class="nav-item">
-            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">The Atelier</a>
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">HOME</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>
@@ -135,11 +135,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <div class="col-lg-6 hero-content pr-lg-5 stagger-reveal">
             <div class="hero-badge reveal-item">✧ Signature Collection</div>
             <h1 class="hero-title reveal-item mt-4 mb-4">
-              Align Your Space.<br>
-              <span class="text-gold">Elevate Your Destiny.</span>
+              Where Vastu Meets Destiny.<br>
+              <span class="text-gold">Unlock Divine Prosperity.</span>
             </h1>
             <p class="hero-subtitle reveal-item mb-5">
-              Discover bespoke Vastu remedies, ethically sourced gemstones, and profound astrological guidance curated by master consultant S. Ramesh.
+              Rooted in ancient Vastu Shastra and Vedic wisdom, Vastu Shakti Rahasya guides you to harmonize your home's energies, invite abundance, and align every space with the cosmic blueprint of prosperity — curated by master consultant S. Ramesh.
             </p>
             <!-- <div class="hero-cta-group reveal-item d-flex gap-4 align-items-center">
               <a href="store.php" class="btn-luxury-solid">Explore The Store</a>
@@ -249,7 +249,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <div class="image-placeholder bg-gemstone"></div>
                 <div class="card-overlay"></div>
               </div>
-              <div class="card-info">
+              <div class="card-info"> 
                 <h3>Vedic Gemstones</h3>
                 <span class="shop-link">View Collection</span>
               </div>

@@ -69,7 +69,7 @@ $phone = $_SESSION['phone'] ?? '';
         <!-- 2. Navigation Links (Right of Logo, pushes remaining items to Extreme Right) -->
         <ul class="navbar-nav align-items-xl-center nav-links-premium ms-xl-4 mt-4 mt-xl-0 pb-3 pb-xl-0 me-auto">
           <li class="nav-item">
-            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">The Atelier</a>
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">HOME</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>

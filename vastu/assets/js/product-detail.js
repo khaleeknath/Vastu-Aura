@@ -173,29 +173,54 @@ function loadProduct() {
       if (nameEl) nameEl.innerText = product.name;
 
       // Populate product image
-      const imgEl = document.getElementById("productImage");
-      if (imgEl) {
-        if (product.image) {
-          imgEl.src = "assets/uploads/products/" + product.image;
-          imgEl.alt = product.name;
-        } else {
-          // Fallback placeholder consistent with store.js category logic
-          const cat = product.category_name
-            ? product.category_name.toLowerCase()
-            : "";
-          let fallbackImg =
-            "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80";
-          if (cat.includes("bracelet")) {
-            fallbackImg =
-              "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80";
-          } else if (cat.includes("yantra")) {
-            fallbackImg =
-              "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80";
-          }
-          imgEl.src = fallbackImg;
-          imgEl.alt = product.name;
-        }
-      }
+    // Populate product image carousel
+const carouselInner = document.getElementById("productCarouselInner");
+const carouselIndicators = document.getElementById("productCarouselIndicators");
+
+if (carouselInner) {
+  let images = Array.isArray(product.images) && product.images.length
+    ? product.images
+    : [];
+
+  if (images.length === 0) {
+    // Fallback placeholder consistent with store.js category logic
+    const cat = product.category_name ? product.category_name.toLowerCase() : "";
+    let fallbackImg =
+      "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80";
+    if (cat.includes("bracelet")) {
+      fallbackImg = "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80";
+    } else if (cat.includes("yantra")) {
+      fallbackImg = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80";
+    }
+    images = [fallbackImg];
+  } else {
+    images = images.map((img) => "assets/uploads/products/" + img);
+  }
+
+  carouselInner.innerHTML = images
+    .map(
+      (src, i) => `
+        <div class="carousel-item ${i === 0 ? "active" : ""}">
+          <img src="${src}" class="d-block w-100 img-fluid" alt="${product.name}">
+        </div>`
+    )
+    .join("");
+
+  if (carouselIndicators) {
+    carouselIndicators.innerHTML = images
+      .map(
+        (_, i) => `
+          <button type="button" data-bs-target="#productImageCarousel" data-bs-slide-to="${i}"
+            class="${i === 0 ? "active" : ""}" aria-current="${i === 0}" aria-label="Slide ${i + 1}"></button>`
+      )
+      .join("");
+    // Hide indicators/arrows entirely if there's only one image
+    carouselIndicators.style.display = images.length > 1 ? "flex" : "none";
+  }
+
+  const controls = document.querySelectorAll("#productImageCarousel .carousel-control-prev, #productImageCarousel .carousel-control-next");
+  controls.forEach((btn) => (btn.style.display = images.length > 1 ? "" : "none"));
+}
 
       // Populate description
       const descEl = document.getElementById("productDescription");

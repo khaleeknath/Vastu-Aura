@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="empty-orders-display reveal-up active text-center py-5">
                 <span class="d-block text-gold fs-2 mb-3">✧</span>
                 <h3 class="cinzel-heading text-dark-900 mb-2">No Order History Found.</h3>
-                <p class="font-montserrat text-muted mb-4">You have not yet acquired any artifacts from our atelier.</p>
+                <p class="font-montserrat text-muted mb-4">You have not yet acquired any artifacts from our Home.</p>
                 <a href="store.php" class="btn-luxury-solid">Explore Store</a>
             </div>
           `;

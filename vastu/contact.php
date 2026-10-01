@@ -66,7 +66,7 @@ $cartCount = $_SESSION['cart_count'] ?? 0;
         <!-- 2. Navigation Links (Right of Logo, pushes remaining items to Extreme Right) -->
         <ul class="navbar-nav align-items-xl-center nav-links-premium ms-xl-4 mt-4 mt-xl-0 pb-3 pb-xl-0 me-auto">
           <li class="nav-item">
-            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">The Atelier</a>
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">HOME</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>
@@ -135,7 +135,7 @@ $cartCount = $_SESSION['cart_count'] ?? 0;
       </div>
       <div class="container mt-5 pt-4 text-center z-index-2 reveal-up">
         <span class="text-gold tracking-wide text-uppercase small font-montserrat fw-bold mb-3 d-block">Concierge & Support</span>
-        <h1 class="cinzel-heading display-2 mb-4 text-dark-900">Reach the Atelier</h1>
+        <h1 class="cinzel-heading display-2 mb-4 text-dark-900">Reach HOME</h1>
         <div class="ornate-divider mx-auto mb-4"></div>
         <p class="font-montserrat text-muted-large mx-auto mb-5" style="max-width: 700px;">
           Whether you seek profound consultation guidance, details regarding our sacred artifacts, or wish to discuss a commercial partnership, our concierge is here to assist you.

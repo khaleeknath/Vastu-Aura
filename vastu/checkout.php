@@ -54,7 +54,7 @@ $phone = $_SESSION['phone'] ?? '';
 
       <div class="collapse navbar-collapse" id="siteNav">
         <ul class="navbar-nav mx-auto nav-links-premium">
-          <li class="nav-item"><a class="nav-link" href="index.php">The Atelier</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.php">HOME</a></li>
           <li class="nav-item"><a class="nav-link" href="about.php">S. Ramesh</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="services.php" data-bs-toggle="dropdown">Services</a>

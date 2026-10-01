@@ -51,7 +51,7 @@ if (!isset($_SESSION['user_id'])) {
 
       <div class="collapse navbar-collapse" id="siteNav">
         <ul class="navbar-nav mx-auto nav-links-premium">
-          <li class="nav-item"><a class="nav-link" href="index.php">The Atelier</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.php">HOME</a></li>
           <li class="nav-item"><a class="nav-link" href="about.php">S. Ramesh</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="services.php" data-bs-toggle="dropdown">Services</a>
@@ -115,9 +115,20 @@ if (!isset($_SESSION['user_id'])) {
           <!-- Left: Product Image -->
           <div class="col-lg-6 reveal-up active">
             <div class="product-visual">
-              <div class="visual-main">
-                <img id="productImage" class="img-fluid" src="" alt="">
-              </div>
+            <div class="visual-main">
+  <div id="productImageCarousel" class="carousel slide" data-bs-ride="false">
+    <div class="carousel-inner" id="productCarouselInner">
+      <!-- slides injected by JS -->
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+    <div class="carousel-indicators" id="productCarouselIndicators"></div>
+  </div>
+</div>
             </div>
           </div>
 

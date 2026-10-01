@@ -101,7 +101,7 @@ session_start();
           <!-- Auth Footer Links -->
           <div class="col-12 text-center mt-4">
               <p class="text-white-50 small mb-2">Already have an account? <a href="login.php" class="text-gold text-decoration-none hover-opacity-100 transition-smooth">Sign In</a></p>
-              <p class="text-white-50 small mb-0"><a href="index.php" class="text-white-50 text-decoration-none hover-opacity-100 transition-smooth">&larr; Return to Atelier</a></p>
+              <p class="text-white-50 small mb-0"><a href="index.php" class="text-white-50 text-decoration-none hover-opacity-100 transition-smooth">&larr; Return to Home</a></p>
           </div>
           
         </form>

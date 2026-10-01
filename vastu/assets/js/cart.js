@@ -76,7 +76,7 @@ function loadCart() {
               <span class="d-block text-gold fs-2 mb-3">✧</span>
               <h3 class="cinzel-heading text-dark-900 mb-2">Your selection is empty.</h3>
               <p class="font-montserrat text-muted mb-4">You have not yet added any sacred artifacts to your cart.</p>
-              <a href="store.php" class="btn-luxury-solid">Explore The Atelier</a>
+              <a href="store.php" class="btn-luxury-solid">Explore HOME</a>
           </div>
         `;
 

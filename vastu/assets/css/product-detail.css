@@ -887,3 +887,16 @@ a {
     width: 100%;
   }
 }
+
+
+.visual-main .carousel-item img {
+  border-radius: inherit;
+}
+.visual-main .carousel-indicators [data-bs-target] {
+  background-color: var(--clr-gold-main, #c9a24b);
+}
+.visual-main .carousel-control-prev-icon,
+.visual-main .carousel-control-next-icon {
+  filter: invert(1) grayscale(100);
+  background-size: 60%;
+}

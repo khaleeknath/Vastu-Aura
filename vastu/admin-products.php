@@ -142,10 +142,23 @@ while ($c = mysqli_fetch_assoc($catResult)) {
               </thead>
               <tbody>
 <?php
+$imgStmt = mysqli_prepare($conn, "SELECT id, image FROM tbl_product_images WHERE product_id = ? ORDER BY sort_order ASC");
+ 
 $sr = 1;
 while ($row = mysqli_fetch_assoc($result)) {
     $imgPath = !empty($row['image']) ? 'assets/uploads/products/' . htmlspecialchars($row['image']) : '';
+ 
+    // ---- Fetch this product's full image gallery ----
+    mysqli_stmt_bind_param($imgStmt, "i", $row['id']);
+    mysqli_stmt_execute($imgStmt);
+    $imgResult = mysqli_stmt_get_result($imgStmt);
+    $productImages = [];
+    while ($img = mysqli_fetch_assoc($imgResult)) {
+        $productImages[] = ['id' => (int)$img['id'], 'image' => $img['image']];
+    }
+    $imagesJson = htmlspecialchars(json_encode($productImages), ENT_QUOTES, 'UTF-8');
 ?>
+<!-- rest of the <tr> stays the same, just add data-images to the existing button -->
 <tr>
     <td><?= $sr++ ?></td>
     <td>
@@ -174,12 +187,17 @@ while ($row = mysqli_fetch_assoc($result)) {
                 data-stock="<?= htmlspecialchars($row['stock']) ?>"
                 data-status="<?= htmlspecialchars($row['status']) ?>"
                 data-category-id="<?= htmlspecialchars($row['category_id']) ?>"
-                data-image="<?= htmlspecialchars($row['image'] ?? '') ?>">
+                data-images="<?= $imagesJson ?>">
             View / Edit
         </button>
+        <button type="button" class="btn btn-sm btn-outline-success refill-stock"
+        data-id="<?= $row['id'] ?>"
+        data-name="<?= htmlspecialchars($row['name']) ?>">
+    Refill Stock
+</button>
     </td>
 </tr>
-<?php } ?>
+<?php } ?>  
               </tbody>
             </table>
           </div>
@@ -253,8 +271,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <textarea name="details" class="form-control" rows="3"></textarea>
               </div>
               <div class="col-md-12">
-                <label class="form-label">Product Image</label>
-                <input type="file" name="image" accept="image/*" class="form-control">
+                <label class="form-label">Product Images</label>
+                <input type="file" name="images[]" accept="image/*" class="form-control" multiple>
+                <small class="text-muted">You can select up to 3 images. The first one is used as the main thumbnail.</small>
               </div>
               <div class="col-12">
                 <p class="text-muted mb-0">New products are saved as <strong>Inactive</strong> by default. Activate them from the product list once ready.</p>
@@ -316,10 +335,13 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Replace Image (optional)</label>
-              <input type="file" id="modalImage" accept="image/*" class="form-control">
-            </div>
+            <div class="col-md-12">
+      <label class="form-label">Images</label>
+      <div id="modalImageGallery" class="d-flex flex-wrap gap-2 mb-2"></div>
+      <label class="form-label">Add New Images</label>
+      <input type="file" id="modalNewImages" name="images[]" accept="image/*" class="form-control" multiple>
+      <small class="text-muted">Up to 3 images total. Click the × on a thumbnail to remove it.</small>
+      </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -330,6 +352,29 @@ while ($row = mysqli_fetch_assoc($result)) {
       </div>
     </div>
   </div>
+
+  <!-- Refill Stock Modal -->
+<div class="modal fade" id="refillStockModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Refill Stock — <span id="refillProductName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="refillProductId">
+        <div class="mb-3"> 
+          <label class="form-label">Quantity Received</label>
+          <input type="number" min="1" id="refillQuantity" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="refillSaveBtn" class="btn btn-success">Add Stock</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>

@@ -6,7 +6,7 @@ session_start();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Atelier Login | Vastu Shakti Rahasya</title>
+  <title>HOME Login | Vastu Shakti Rahasya</title>
   
   <!-- Premium Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,7 +89,7 @@ session_start();
             <a href="index.php" class="auth-brand-logo mb-3 d-inline-block">
                 <img src="assets/images/logo.jpeg" alt="Vastu Shakti Rahasya" class="auth-logo-img">
             </a>
-            <h1 class="cinzel-heading fs-3 text-dark-900 mb-2">Welcome to The Atelier</h1>
+            <h1 class="cinzel-heading fs-3 text-dark-900 mb-2">Welcome to HOME</h1>
             <p class="font-montserrat text-muted small tracking-wide text-uppercase mb-0">Secure Client Access</p>
           </div>
 

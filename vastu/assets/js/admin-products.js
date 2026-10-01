@@ -1,7 +1,41 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const messageBox = document.getElementById('productMessage');
-  
+    const IMAGE_BASE_PATH = 'assets/uploads/products/';
+    let removedImageIds = [];
+
+    function renderProductGallery(images) {
+      const gallery = document.getElementById('modalImageGallery');
+      gallery.innerHTML = '';
+     
+      images.forEach(img => {
+        const wrap = document.createElement('div');
+        wrap.className = 'position-relative';
+        wrap.style.width = '64px';
+        wrap.style.height = '64px';
+        wrap.dataset.imageId = img.id;
+     
+        wrap.innerHTML = `
+        <img src="${IMAGE_BASE_PATH}${img.image}" alt=""
+             style="width:64px;height:64px;object-fit:cover;border-radius:6px;">
+        <button type="button" class="btn bg-danger text-white rounded-circle remove-gallery-image p-0
+                                      d-flex align-items-center justify-content-center"
+                style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;
+                       line-height:1;font-size:14px;border:none;"
+                data-id="${img.id}" aria-label="Remove">&times;</button>
+      `;
+        gallery.appendChild(wrap);
+      });
+     
+      gallery.querySelectorAll('.remove-gallery-image').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.dataset.id);
+          removedImageIds.push(id);
+          btn.closest('[data-image-id]')?.remove();
+        });
+      });
+    }
+
     function showMessage(text, isError) {
       if (!messageBox) return;
       messageBox.textContent = text;
@@ -118,8 +152,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modalStock').value = btn.dataset.stock;
         document.getElementById('modalProductStatus').value = btn.dataset.status;
         document.getElementById('modalCategoryId').value = btn.dataset.categoryId;
-        document.getElementById('modalImage').value = '';
-  
+     
+        // NEW: reset removal tracking + new-file input, then render existing images
+        removedImageIds = [];
+        document.getElementById('modalNewImages').value = '';
+        const images = JSON.parse(btn.dataset.images || '[]');
+        renderProductGallery(images);
+     
         productModal?.show();
       });
     });
@@ -140,10 +179,17 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('category_id', document.getElementById('modalCategoryId').value);
         formData.append('status', document.getElementById('modalProductStatus').value);
   
-        const imageFile = document.getElementById('modalImage').files[0];
-        if (imageFile) {
-          formData.append('image', imageFile);
-        }
+        // const imageFile = document.getElementById('modalImage').files[0];
+        // if (imageFile) {
+        //   formData.append('image', imageFile);
+        // }
+
+        removedImageIds.forEach(id => formData.append('removed_images[]', id));
+ 
+        const newImageFiles = document.getElementById('modalNewImages').files;
+        Array.from(newImageFiles).forEach(file => {
+          formData.append('images[]', file);
+        });
   
         const res = await fetch('assets/api/update-product.php', {
           method: 'POST',
@@ -202,3 +248,51 @@ document.addEventListener('DOMContentLoaded', function () {
    
   
   });
+
+  // ---------------- Refill Stock ----------------
+const refillStockModalEl = document.getElementById('refillStockModal');
+const refillStockModal = refillStockModalEl ? new bootstrap.Modal(refillStockModalEl) : null;
+
+document.querySelectorAll('.refill-stock').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('refillProductId').value = btn.dataset.id;
+    document.getElementById('refillProductName').textContent = btn.dataset.name;
+    document.getElementById('refillQuantity').value = '';
+    refillStockModal?.show();
+  });
+});
+
+document.getElementById('refillSaveBtn')?.addEventListener('click', async () => {
+  const quantity = document.getElementById('refillQuantity').value;
+
+  if (!quantity || Number(quantity) <= 0) {
+    alert('Please enter a valid quantity.');
+    return;
+  }
+
+  const btn = document.getElementById('refillSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const formData = new FormData();
+    formData.append('product_id', document.getElementById('refillProductId').value);
+    formData.append('quantity', quantity);
+
+    const res = await fetch('assets/api/refill-stock.php', { method: 'POST', body: formData });
+    const data = await res.json();
+      console.log("Datag Success", data.success)
+    if (data.success) {
+      refillStockModal?.hide();
+      showMessage(`${data.message} New stock: ${data.new_stock}`, false);
+      reloadPage();
+    } else {
+      alert(data.message || 'Failed to refill stock.');
+    }
+  } catch (err) {
+    alert('Something went wrong while refilling stock.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Stock';
+  }
+});
