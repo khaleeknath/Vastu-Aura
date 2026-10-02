@@ -32,9 +32,9 @@ if (empty($_SESSION['user_id'])) {
 //    e.g. require_once __DIR__ . '/../config/db.php';
 // ---------------------------------------------------------------
 $DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'vastu_db';
+$DB_USER = 'u587738524_root';
+$DB_PASS = 'uM9>wCaKx|n';
+$DB_NAME = 'u587738524_vastu_db';
 
 $conn = @new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 

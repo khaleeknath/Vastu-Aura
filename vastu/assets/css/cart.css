@@ -571,6 +571,34 @@ a {
   transition-delay: 0.2s;
 }
 
+.qty-control {
+  border: 1px solid var(--clr-border, #e5ded0);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.qty-btn:hover:not(:disabled) {
+  background: var(--clr-gold, #b8963e);
+  color: #fff;
+}
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.qty-value {
+  min-width: 36px;
+  text-align: center;
+}
+
 /* ==========================================================================
      Responsive Adjustments
      ========================================================================== */
@@ -598,3 +626,5 @@ a {
     margin-bottom: 15px;
   }
 }
+
+

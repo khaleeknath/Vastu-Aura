@@ -114,11 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch(url)
       .then((response) => response.json())
       .then((result) => {
-        // Update Cart Badge from backend response
-        const cartCountEl = document.getElementById("cartCount");
-        if (cartCountEl) {
-          cartCountEl.innerText = result.cartCount || 0;
-        }
+                // Update Cart Badge (desktop + mobile) from backend response
+                updateCartBadges(result.cartCount || 0);
+
 
         let html = "";
 
@@ -198,40 +196,84 @@ document.addEventListener("DOMContentLoaded", () => {
         if (grid) grid.innerHTML = html;
 
         // Re-bind toast triggers for dynamically loaded buttons
-        bindToastTriggers();
+        // bindToastTriggers();
       })
       .catch((error) => {
         console.error("ERROR Loading Products from API:", error);
       });
   }
 
-  // 7. Elegant Toast Notification for Cart Actions
-  function bindToastTriggers() {
-    const toastTriggers = document.querySelectorAll(".toast-trigger");
-    const toastBanner = document.getElementById("cartToast");
+   // 7. Add to Cart (calls backend API) + Toast
+   const CART_API_URL = "assets/api/add-to-cart.php"; 
 
-    toastTriggers.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        if (toastBanner) {
-          toastBanner.classList.remove("d-none");
-          toastBanner.classList.add("show");
-
-          // Update dynamic cart indicator locally on visual layer
-          const cartCountEl = document.getElementById("cartCount");
-          if (cartCountEl) {
-            cartCountEl.innerText = parseInt(cartCountEl.innerText) + 1;
-          }
-
-          // Hide UI element after 3 seconds
-          setTimeout(() => {
-            toastBanner.classList.remove("show");
-          }, 3000);
-        }
-      });
-    });
-  }
+   function showToast(message, isError = false) {
+     const toastBanner = document.getElementById("cartToast");
+     if (!toastBanner) return;
+ 
+     toastBanner.innerHTML = `<span class="text-gold me-2">${isError ? "!" : "✦"}</span> ${message}`;
+     toastBanner.classList.remove("d-none");
+     toastBanner.classList.add("show");
+ 
+     clearTimeout(showToast.timer);
+     showToast.timer = setTimeout(() => {
+       toastBanner.classList.remove("show");
+     }, 3000);
+   }
+ 
+   function updateCartBadges(count) {
+     ["cartCount", "cartCountMobile"].forEach((id) => {
+       const el = document.getElementById(id);
+       if (el) el.innerText = count;
+     });
+   }
+ 
+   async function addToCart(productId, btn) {
+     btn.disabled = true; // prevent double clicks
+ 
+     try {
+       const response = await fetch(CART_API_URL, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ product_id: productId, quantity: 1 }),
+       });
+ 
+       const result = await response.json();
+ 
+       if (result.success) {
+         showToast(result.message || "Item successfully added to your cart.");
+ 
+         // Use count from server if provided, otherwise increment locally
+         if (typeof result.cartCount !== "undefined") {
+           updateCartBadges(result.cartCount);
+         } else {
+           const current = parseInt(document.getElementById("cartCount")?.innerText) || 0;
+           updateCartBadges(current + 1);
+         }
+       } else {
+         showToast(result.message || "Could not add item.", true);
+ 
+         // Not logged in -> send to login after a short pause
+         if ((result.message || "").toLowerCase().includes("login")) {
+           setTimeout(() => (window.location.href = "login.php"), 1500);
+         }
+       }
+     } catch (error) {
+       console.error("Add to cart error:", error);
+       showToast("Something went wrong. Please try again.", true);
+     } finally {
+       btn.disabled = false;
+     }
+   }
+ 
+   // Delegated listener: works for all current and future product cards
+   document.getElementById("productGrid")?.addEventListener("click", (e) => {
+     const btn = e.target.closest(".btn-add-cart");
+     if (!btn) return;
+ 
+     e.preventDefault();
+     const productId = parseInt(btn.dataset.id, 10);
+     if (productId) addToCart(productId, btn);
+   });
 
   // 8. Category Filter Buttons Interaction Handling (rebound whenever categories reload)
   function bindFilterTriggers() {

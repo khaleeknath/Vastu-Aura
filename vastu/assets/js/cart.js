@@ -62,6 +62,72 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCart();
 });
 
+
+
+const ADD_CART_API_URL = "assets/api/add-to-Cart.php"; // <-- your add-to-cart file name
+
+function updateCartBadges(count) {
+  ["cartCount", "cartCountMobile"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = count;
+  });
+}
+
+function increaseQty(productId, btn) {
+  btn.disabled = true;
+
+  fetch(ADD_CART_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res.success) {
+        if (typeof res.cartCount !== "undefined") updateCartBadges(res.cartCount);
+        loadCart();
+      } else {
+        alert(res.message || "Could not update quantity.");
+        btn.disabled = false;
+      }
+    })
+    .catch((err) => {
+      console.error("Error increasing quantity:", err);
+      btn.disabled = false;
+    });
+}
+
+function decreaseQty(cartId, currentQty, btn) {
+  // At quantity 1, minus means remove: reuse the confirm flow
+  if (currentQty <= 1) {
+    removeCart(cartId);
+    return;
+  }
+
+  btn.disabled = true;
+
+  fetch("assets/api/remove-cart.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "cart_id=" + cartId + "&decrease=1",
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      if (res.success) {
+        if (typeof res.cartCount !== "undefined") updateCartBadges(res.cartCount);
+        loadCart();
+      } else {
+        alert(res.message || "Could not update quantity.");
+        btn.disabled = false;
+      }
+    })
+    .catch((err) => {
+      console.error("Error decreasing quantity:", err);
+      btn.disabled = false;
+    });
+}
+
+
 // Globally accessible for removeCart re-renders
 function loadCart() {
   fetch("assets/api/cart.php")
@@ -91,21 +157,28 @@ function loadCart() {
 
       res.data.forEach((item) => {
         subtotal += item.price * item.quantity;
-
+        
         const defaultImg =
           "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80";
 
         html += `
           <div class="luxury-cart-row d-flex flex-column flex-md-row align-items-md-center gap-3 gap-md-4 mb-4 reveal-up active">
               <div class="cart-item-img-wrapper">
-                  <img src="uploads/products/${item.image}" alt="${item.name}" onerror="this.src='${defaultImg}'">
+                  <img src="assets/uploads/products/${item.image}" alt="${item.name}" onerror="this.src='${defaultImg}'">
               </div>
               
               <div class="cart-item-details flex-grow-1">
                   <h3 class="cinzel-heading fs-5 mb-1 text-dark-900">${item.name}</h3>
-                  <p class="font-montserrat text-muted small mb-2">Quantity: <strong>${item.quantity}</strong></p>
-                  <button class="btn-remove-item font-montserrat" onclick="removeCart(${item.cart_id})">Remove Element</button>
-              </div>
+ 
+                  <p class="font-montserrat text-muted small mb-2">Quantity</p>
+                  <div class="qty-control d-inline-flex align-items-center">
+                    <button class="qty-btn" aria-label="Decrease quantity"
+                            onclick="decreaseQty(${item.cart_id}, ${item.quantity}, this)">−</button>
+                    <span class="qty-value font-montserrat fw-bold">${item.quantity}</span>
+                    <button class="qty-btn" aria-label="Increase quantity"
+                            onclick="increaseQty(${item.product_id}, this)">+</button>
+                  </div>
+                   </div>
 
               <div class="cart-item-pricing text-md-end mt-2 mt-md-0 border-top border-md-0 pt-3 pt-md-0" style="border-color: var(--clr-border) !important;">
                   <span class="d-block font-montserrat text-muted small text-uppercase tracking-wide mb-1 d-none d-md-block">Value</span>
@@ -147,17 +220,15 @@ function removeCart(cartId) {
 function executeRemove(cartId) {
   fetch("assets/api/remove-cart.php", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: "cart_id=" + cartId,
   })
     .then((res) => res.json())
     .then((res) => {
       if (res.success) {
+        if (typeof res.cartCount !== "undefined") updateCartBadges(res.cartCount);
         loadCart();
-          // Refresh page so updated session value is loaded
-          location.reload();
+
         const commonModalEl = document.getElementById("commonModal");
         if (commonModalEl) {
           const modal = bootstrap.Modal.getInstance(commonModalEl);

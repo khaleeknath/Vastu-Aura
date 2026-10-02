@@ -5,3 +5,9 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 ?>
+
+
+$DB_HOST = 'localhost';
+$DB_USER = 'u587738524_root';
+$DB_PASS = 'uM9>wCaKx|n';
+$DB_NAME = 'u587738524_vastu_db';

@@ -173,54 +173,69 @@ function loadProduct() {
       if (nameEl) nameEl.innerText = product.name;
 
       // Populate product image
-    // Populate product image carousel
-const carouselInner = document.getElementById("productCarouselInner");
-const carouselIndicators = document.getElementById("productCarouselIndicators");
+      // Populate product image carousel
+      const carouselInner = document.getElementById("productCarouselInner");
+      const carouselIndicators = document.getElementById(
+        "productCarouselIndicators",
+      );
 
-if (carouselInner) {
-  let images = Array.isArray(product.images) && product.images.length
-    ? product.images
-    : [];
+      if (carouselInner) {
+        let images =
+          Array.isArray(product.images) && product.images.length
+            ? product.images
+            : [];
 
-  if (images.length === 0) {
-    // Fallback placeholder consistent with store.js category logic
-    const cat = product.category_name ? product.category_name.toLowerCase() : "";
-    let fallbackImg =
-      "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80";
-    if (cat.includes("bracelet")) {
-      fallbackImg = "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80";
-    } else if (cat.includes("yantra")) {
-      fallbackImg = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80";
-    }
-    images = [fallbackImg];
-  } else {
-    images = images.map((img) => "assets/uploads/products/" + img);
-  }
+        if (images.length === 0) {
+          // Fallback placeholder consistent with store.js category logic
+          const cat = product.category_name
+            ? product.category_name.toLowerCase()
+            : "";
+          let fallbackImg =
+            "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&q=80";
+          if (cat.includes("bracelet")) {
+            fallbackImg =
+              "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80";
+          } else if (cat.includes("yantra")) {
+            fallbackImg =
+              "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80";
+          }
+          images = [fallbackImg];
+        } else {
+          images = images.map((img) => "assets/uploads/products/" + img);
+        }
 
-  carouselInner.innerHTML = images
-    .map(
-      (src, i) => `
+        carouselInner.innerHTML = images
+          .map(
+            (src, i) => `
         <div class="carousel-item ${i === 0 ? "active" : ""}">
           <img src="${src}" class="d-block w-100 img-fluid" alt="${product.name}">
-        </div>`
-    )
-    .join("");
+        </div>`,
+          )
+          .join("");
 
-  if (carouselIndicators) {
-    carouselIndicators.innerHTML = images
-      .map(
-        (_, i) => `
+        if (carouselIndicators) {
+          carouselIndicators.innerHTML = images
+            .map(
+              (_, i) => `
           <button type="button" data-bs-target="#productImageCarousel" data-bs-slide-to="${i}"
-            class="${i === 0 ? "active" : ""}" aria-current="${i === 0}" aria-label="Slide ${i + 1}"></button>`
-      )
-      .join("");
-    // Hide indicators/arrows entirely if there's only one image
-    carouselIndicators.style.display = images.length > 1 ? "flex" : "none";
-  }
+            class="${i === 0 ? "active" : ""}" aria-current="${i === 0}" aria-label="Slide ${i + 1}"></button>`,
+            )
+            .join("");
+          // Hide indicators/arrows entirely if there's only one image
+          carouselIndicators.style.display =
+            images.length > 1 ? "flex" : "none";
+        }
 
-  const controls = document.querySelectorAll("#productImageCarousel .carousel-control-prev, #productImageCarousel .carousel-control-next");
-  controls.forEach((btn) => (btn.style.display = images.length > 1 ? "" : "none"));
-}
+        const controls = document.querySelectorAll(
+          "#productImageCarousel .carousel-control-prev, #productImageCarousel .carousel-control-next",
+        );
+        controls.forEach(
+          (btn) => (btn.style.display = images.length > 1 ? "" : "none"),
+        );
+
+        // Initialise auto-sliding (3.5s, pauses on hover) and lightbox
+        initCarousel(images, product.name);
+      }
 
       // Populate description
       const descEl = document.getElementById("productDescription");
@@ -261,3 +276,127 @@ if (qtyMinus) {
     }
   });
 }
+
+// 7. Carousel autoplay + Lightbox
+let productCarousel = null;
+
+function initCarousel(images, productName) {
+  const carouselEl = document.getElementById("productImageCarousel");
+  if (!carouselEl) return;
+
+  if (productCarousel) productCarousel.dispose();
+  productCarousel = new bootstrap.Carousel(carouselEl, {
+    interval: 3500,
+    ride: images.length > 1 ? "carousel" : false,
+    pause: "hover",
+    touch: true,
+    wrap: true,
+  });
+  if (images.length > 1) productCarousel.cycle();
+
+  setupLightbox(images, productName, carouselEl);
+}
+
+let lightboxReady = false;
+let lbImages = [];
+let lbIndex = 0;
+let lbName = "";
+let lbCarouselEl = null;
+
+function setupLightbox(images, productName, carouselEl) {
+  lbImages = images;
+  lbName = productName;
+  lbCarouselEl = carouselEl;
+
+  const box = document.getElementById("imgLightbox");
+  const img = document.getElementById("lbImage");
+  const counter = document.getElementById("lbCounter");
+  if (!box || !img) return;
+
+  box.classList.toggle("single", images.length <= 1);
+
+  const show = (i) => {
+    lbIndex = (i + lbImages.length) % lbImages.length;
+    img.src = lbImages[lbIndex];
+    img.alt = lbName;
+    if (counter) counter.textContent = `${lbIndex + 1} / ${lbImages.length}`;
+  };
+  const open = (i) => {
+    show(i);
+    box.classList.add("open");
+    document.body.style.overflow = "hidden";
+    if (productCarousel) productCarousel.pause();
+  };
+  const close = () => {
+    box.classList.remove("open");
+    document.body.style.overflow = "";
+    // keep the main slider on the image the user last viewed
+    if (productCarousel) {
+      productCarousel.to(lbIndex);
+      if (lbImages.length > 1) productCarousel.cycle();
+    }
+  };
+
+  // open on image click (uses currently active slide index)
+  document.getElementById("productCarouselInner").onclick = (e) => {
+    const item = e.target.closest(".carousel-item");
+    if (!item || e.target.tagName !== "IMG") return;
+    const idx = Array.from(item.parentNode.children).indexOf(item);
+    open(idx);
+  };
+
+  // handlers are bound once; they read the current module state
+  if (lightboxReady) {
+    lbApi = { show, open, close };
+    return;
+  }
+  lightboxReady = true;
+  lbApi = { show, open, close };
+
+  document
+    .getElementById("lbClose")
+    .addEventListener("click", () => lbApi.close());
+  document.getElementById("lbPrev").addEventListener("click", (e) => {
+    e.stopPropagation();
+    lbApi.show(lbIndex - 1);
+  });
+  document.getElementById("lbNext").addEventListener("click", (e) => {
+    e.stopPropagation();
+    lbApi.show(lbIndex + 1);
+  });
+
+  // click outside the image closes
+  box.addEventListener("click", (e) => {
+    if (e.target === box) lbApi.close();
+  });
+
+  // keyboard
+  document.addEventListener("keydown", (e) => {
+    if (!box.classList.contains("open")) return;
+    if (e.key === "Escape") lbApi.close();
+    else if (e.key === "ArrowLeft") lbApi.show(lbIndex - 1);
+    else if (e.key === "ArrowRight") lbApi.show(lbIndex + 1);
+  });
+
+  // touch swipe
+  let startX = null;
+  box.addEventListener(
+    "touchstart",
+    (e) => {
+      startX = e.touches[0].clientX;
+    },
+    { passive: true },
+  );
+  box.addEventListener(
+    "touchend",
+    (e) => {
+      if (startX === null || lbImages.length < 2) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) lbApi.show(lbIndex + (dx < 0 ? 1 : -1));
+      startX = null;
+    },
+    { passive: true },
+  );
+}
+
+let lbApi = null;

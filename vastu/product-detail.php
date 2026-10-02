@@ -276,6 +276,15 @@ if (!isset($_SESSION['user_id'])) {
     </div>
   </footer>
 
+  <!-- Image Lightbox -->
+  <div class="img-lightbox" id="imgLightbox" role="dialog" aria-modal="true" aria-label="Product image viewer">
+    <button type="button" class="lb-btn lb-close" id="lbClose" aria-label="Close">&times;</button>
+    <button type="button" class="lb-btn lb-prev" id="lbPrev" aria-label="Previous image">&larr;</button>
+    <img src="" alt="" id="lbImage">
+    <button type="button" class="lb-btn lb-next" id="lbNext" aria-label="Next image">&rarr;</button>
+    <div class="lb-counter" id="lbCounter"></div>
+  </div>
+
   <!-- Confirmation Modal -->
   <div class="custom-modal-overlay" id="productconfirmModal" style="display: none;">
     <div class="custom-modal">

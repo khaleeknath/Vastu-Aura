@@ -3,9 +3,9 @@ header('Content-Type: application/json');
 
 // --- DB connection ---
 $host = "localhost";
-$dbUser = "root";
-$dbPass = "";
-$dbName = "vastu_db";
+$dbUser = "u587738524_root";
+$dbPass = "uM9>wCaKx|n";
+$dbName = "u587738524_vastu_db";
 
 $conn = new mysqli($host, $dbUser, $dbPass, $dbName);
 

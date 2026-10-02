@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
         "message" => "Please login first."
     ]);
     exit;
-}
+} 
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -44,7 +44,22 @@ if ($result->num_rows > 0) {
 
 }
 
+
+$countStmt = $conn->prepare("SELECT COALESCE(SUM(quantity),0) AS total FROM tbl_cart WHERE user_id=?");
+$countStmt->bind_param("i", $user_id);
+$countStmt->execute();
+$cartCount = (int)$countStmt->get_result()->fetch_assoc()['total'];
+
+$_SESSION['cart_count'] = $cartCount;
+
 echo json_encode([
-    "success" => true,
-    "message" => "Product added to cart successfully."
+    "success"   => true,
+    "message"   => "Product added to cart successfully.",
+    "cartCount" => $cartCount
 ]);
+
+
+// echo json_encode([
+//     "success" => true,
+//     "message" => "Product added to cart successfully."
+// ]);

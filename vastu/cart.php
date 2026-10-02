@@ -149,10 +149,10 @@ if (!isset($_SESSION['user_id'])) {
               <!-- Header Row -->
               <div class="d-none d-md-flex justify-content-between align-items-center mb-4 pb-2 border-bottom font-montserrat text-uppercase small tracking-wide fw-bold text-muted">
                 <span style="width: 55%;">Product</span>
-                <span style="width: 20%;" class="text-center">Quantity</span>
+                <!-- <span style="width: 20%;" class="text-center">Quantity</span> -->
                 <span style="width: 25%;" class="text-end">Subtotal</span>
               </div>
-              
+               
               <!-- Cart Items dynamically injected via JS -->
               <div id="cartItems" class="cart-items-wrapper">
                 <div class="text-center py-5">

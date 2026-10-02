@@ -61,7 +61,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- 2. Navigation Links (Right of Logo, pushes remaining items to Extreme Right) -->
         <ul class="navbar-nav align-items-xl-center nav-links-premium ms-xl-4 mt-4 mt-xl-0 pb-3 pb-xl-0 me-auto">
           <li class="nav-item">
-            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">HOME</a>
+            <a class="nav-link <?= ($current_page == 'index.php') ? 'active' : '' ?>" href="index.php">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'about.php') ? 'active' : '' ?>" href="about.php">S. Ramesh</a>
@@ -249,7 +249,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <div class="image-placeholder bg-gemstone"></div>
                 <div class="card-overlay"></div>
               </div>
-              <div class="card-info"> 
+              <div class="card-info">
                 <h3>Vedic Gemstones</h3>
                 <span class="shop-link">View Collection</span>
               </div>
@@ -406,7 +406,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
           <ul class="footer-links">
             <li><a href="contact.php">Contact Us</a></li>
             <li><a href="faq.php">FAQs</a></li>
-            <li><a href="login.php">Admin</a></li>
+            <li><a href="admin-login.php">Admin</a></li>
           </ul>
         </div>
       </div>

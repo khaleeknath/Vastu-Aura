@@ -31,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 //    and make sure it defines a mysqli instance called $conn.
 // ---------------------------------------------------------------
 $DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'vastu_db';
+$DB_USER = 'u587738524_root';
+$DB_PASS = 'uM9>wCaKx|n';
+$DB_NAME = 'u587738524_vastu_db';
 
 $conn = @new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 

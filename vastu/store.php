@@ -104,7 +104,7 @@ $cartCount = $_SESSION['cart_count'] ?? 0;
           <?php if (isset($_SESSION['user_id'])): ?>
             <div class="nav-item dropdown">
               <a class="nav-link dropdown-toggle user-greeting-link fw-bold" href="#" data-bs-toggle="dropdown">
-                   <?= htmlspecialchars($_SESSION['name'] ?? 'Guest') ?>
+                    <?= htmlspecialchars($_SESSION['name'] ?? 'Guest') ?>
               </a>
               <ul class="dropdown-menu dropdown-menu-end luxury-dropdown">
                   <li><a class="dropdown-item" href="myorder.php">Order History</a></li>
