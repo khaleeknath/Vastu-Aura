@@ -23,15 +23,29 @@
  * will give you their own host/port/username/password - use those instead.
  */
 
+// define('SMTP_HOST', 'smtp.gmail.com');
+// define('SMTP_PORT', 587);
+// define('SMTP_SECURE', 'tls');            // 'tls' or 'ssl'
+// define('SMTP_USERNAME', 'khaleeknath@gmail.com');
+// define('SMTP_PASSWORD', 'qmel gzcw yizh mhqr');
+
+// // What shows up as the "From" name/address on emails sent to customers
+// define('MAIL_FROM_EMAIL', 'khaleeknath@gmail.com'); // usually same as SMTP_USERNAME
+// define('MAIL_FROM_NAME', 'Vastu Shakti Rahasya');
+
+// // Where booking notifications should be sent to YOU (the business owner)
+// define('ADMIN_NOTIFICATION_EMAIL', 'khaleeknath@gmail.com');
+
+
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
 define('SMTP_SECURE', 'tls');            // 'tls' or 'ssl'
-define('SMTP_USERNAME', 'khaleeknath@gmail.com');
-define('SMTP_PASSWORD', 'qmel gzcw yizh mhqr');
+define('SMTP_USERNAME', 'vastushaktir@gmail.com');
+define('SMTP_PASSWORD', 'rpct qntk kvut opce');
 
 // What shows up as the "From" name/address on emails sent to customers
-define('MAIL_FROM_EMAIL', 'khaleeknath@gmail.com'); // usually same as SMTP_USERNAME
+define('MAIL_FROM_EMAIL', 'vastushaktir@gmail.com'); // usually same as SMTP_USERNAME
 define('MAIL_FROM_NAME', 'Vastu Shakti Rahasya');
 
 // Where booking notifications should be sent to YOU (the business owner)
-define('ADMIN_NOTIFICATION_EMAIL', 'khaleeknath@gmail.com');
+define('ADMIN_NOTIFICATION_EMAIL', 'vastushaktir@gmail.com');

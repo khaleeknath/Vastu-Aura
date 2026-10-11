@@ -138,7 +138,7 @@ if (!isset($_SESSION['user_id'])) {
               <span class="eyebrow" id="productCategory"></span>
               <h1 id="productName"></h1>
               <p class="product-lead" id="productDescription"></p>
-
+              <p class="product-lead" id="productDetails"></p>
               <div class="price-row">
                 <strong id="productPrice"></strong>
                 <span>Inclusive of premium packaging</span>

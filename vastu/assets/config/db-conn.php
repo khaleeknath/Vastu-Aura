@@ -1,5 +1,5 @@
 <?php
-$conn = mysqli_connect("localhost", "u587738524_root", "uM9>wCaKx|n", "u587738524_vastu_db");
+$conn = mysqli_connect("localhost", "root", "", "vastu_db");
 
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());

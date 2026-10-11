@@ -8,3 +8,6 @@
  */
 define('RAZORPAY_KEY_ID','rzp_live_Th2LKYqe85uhN4');   // <-- your Test Key ID
 define('RAZORPAY_KEY_SECRET','6MxI6PQzuOSJgCAHx7q3ZjjY');  // <-- your Test Key Secret
+
+// define('RAZORPAY_KEY_ID', 'rzp_test_TVaIU7vUfeq9jV');   // <-- your Test Key ID
+// define('RAZORPAY_KEY_SECRET', 'Zs7PWEHUqj1qLkcFAZDC9Bkt');  // <-- your Test Key Secret

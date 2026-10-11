@@ -238,7 +238,7 @@ function loadProduct() {
       }
 
       // Populate description
-      const descEl = document.getElementById("productDescription");
+      const descEl = document.getElementById("productDescription"); 
       if (descEl) descEl.innerText = product.description;
 
       // Populate price
@@ -248,6 +248,10 @@ function loadProduct() {
       // Populate product notes
       const notesEl = document.getElementById("productNotes");
       if (notesEl) notesEl.innerText = product.description;
+
+      // Populate description
+      const detailsEl = document.getElementById("productDetails"); 
+      if (detailsEl) detailsEl.innerText = product.details;
     })
     .catch((error) => {
       console.error(error);

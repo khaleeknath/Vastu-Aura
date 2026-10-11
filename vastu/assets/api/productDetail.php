@@ -14,6 +14,7 @@ SELECT
     p.price,
     p.image,
     p.stock,
+    p.details,
     c.name AS category_name
 FROM tbl_products p
 LEFT JOIN tbl_categories c

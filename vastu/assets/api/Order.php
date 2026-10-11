@@ -160,7 +160,7 @@ try {
     $emailData = [
         'order_id'            => $order_id,
         'name'                => $_SESSION['name'],
-        'email'               => $data['email'] ?? '',
+        'email'               => $_SESSION['email'] ?? '',
         'items'               => $emailItems,
         'order_date'          => date('Y-m-d H:i:s'),
         'payment_method'      => $paymentMethod,

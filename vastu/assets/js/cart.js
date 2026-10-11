@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-const ADD_CART_API_URL = "assets/api/add-to-Cart.php"; // <-- your add-to-cart file name
+const ADD_CART_API_URL = "assets/api/add-to-cart.php"; // <-- your add-to-cart file name
 
 function updateCartBadges(count) {
   ["cartCount", "cartCountMobile"].forEach((id) => {
